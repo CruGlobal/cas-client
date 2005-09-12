@@ -1,0 +1,34 @@
+Sep 10, 2004 4:58:33 PM edu.yale.its.tp.cas.client.filter.ProxyChainScrutinizerFilter isRequestAuthorized
+WARNING: request was not of expected type HttpServletRequest - considering request unauthorized.
+Sep 10, 2004 4:58:33 PM edu.yale.its.tp.cas.client.filter.ProxyChainScrutinizerFilter isRequestAuthorized
+WARNING: request was not of expected type HttpServletRequest - considering request unauthorized.
+Sep 10, 2004 4:58:33 PM edu.yale.its.tp.cas.client.filter.ProxyChainScrutinizerFilter doFilter
+INFO: Sending FORBIDDEN.
+Sep 10, 2004 4:58:33 PM edu.yale.its.tp.cas.client.filter.ProxyChainScrutinizerFilter isRequestAuthorized
+INFO: No HttpSession was established into which a CASReceipt might have been stored - considering request unauthorized.
+Sep 10, 2004 4:58:33 PM edu.yale.its.tp.cas.client.filter.ProxyChainScrutinizerFilter doFilter
+INFO: Sending FORBIDDEN.
+Sep 10, 2004 4:58:33 PM edu.yale.its.tp.cas.client.filter.ProxyChainScrutinizerFilter isRequestAuthorized
+INFO: CASReceipt was not present in HttpSession - considered request unauthorized.
+Sep 10, 2004 4:58:33 PM edu.yale.its.tp.cas.client.filter.ProxyChainScrutinizerFilter doFilter
+INFO: Sending FORBIDDEN.
+Sep 10, 2004 4:58:33 PM edu.yale.its.tp.cas.client.filter.ProxyChainScrutinizerFilter isRequestAuthorized
+WARNING: An object was present in the session attribute edu.yale.its.tp.cas.client.filter.receipt but it wasn't of type edu.yale.its.tp.cas.client.CASReceipt
+Sep 10, 2004 4:58:33 PM edu.yale.its.tp.cas.client.filter.ProxyChainScrutinizerFilter doFilter
+INFO: Sending FORBIDDEN.
+Sep 10, 2004 4:58:33 PM edu.yale.its.tp.cas.client.filter.ProxyChainScrutinizerFilter isRequestAuthorized
+INFO: CAS receipt: [edu.yale.its.tp.cas.client.CASReceipt userName=[null] casValidateUrl=[null] proxyCallbackUrl=[null] pgtIou=[null] casValidateUrl=[null] proxyList=[[https://www.immediatelyPreviousAuthenticationProxyingService.com, https://secure.com/middleTierService, https://secure.com/notTheAuthorizedUserInterface]]] did not present a proxy chain among those authorized: [[https://www.immediatelyPreviousAuthenticationProxyingService.com, https://secure.com/middleTierService, https://secure.com/userInterface], [https://www.yale.edu/immediatelyPreviousServiceInChain, https://www.princeton.edu/middleware, https://www.northwestern.edu/userInitiallyAuthenticatedToThisApplication]] - considering request unauthorized.
+Sep 10, 2004 4:58:33 PM edu.yale.its.tp.cas.client.filter.ProxyChainScrutinizerFilter doFilter
+INFO: Sending FORBIDDEN.
+Sep 10, 2004 4:58:33 PM edu.yale.its.tp.cas.client.filter.ProxyChainScrutinizerFilter isRequestAuthorized
+INFO: CAS receipt: [edu.yale.its.tp.cas.client.CASReceipt userName=[null] casValidateUrl=[null] proxyCallbackUrl=[null] pgtIou=[null] casValidateUrl=[null] proxyList=[[https://www.immediatelyPreviousAuthenticationProxyingService.com, https://secure.com/middleTierService]]] did not present a proxy chain among those authorized: [[https://www.immediatelyPreviousAuthenticationProxyingService.com, https://secure.com/middleTierService, https://secure.com/userInterface], [https://www.yale.edu/immediatelyPreviousServiceInChain, https://www.princeton.edu/middleware, https://www.northwestern.edu/userInitiallyAuthenticatedToThisApplication]] - considering request unauthorized.
+Sep 10, 2004 4:58:33 PM edu.yale.its.tp.cas.client.filter.ProxyChainScrutinizerFilter doFilter
+INFO: Sending FORBIDDEN.
+Sep 10, 2004 4:58:33 PM edu.yale.its.tp.cas.client.filter.ProxyChainScrutinizerFilter isRequestAuthorized
+INFO: CAS receipt: [edu.yale.its.tp.cas.client.CASReceipt userName=[null] casValidateUrl=[null] proxyCallbackUrl=[null] pgtIou=[null] casValidateUrl=[null] proxyList=[[https://www.princeton.edu/middleware, https://www.northwestern.edu/userInitiallyAuthenticatedToThisApplication]]] did not present a proxy chain among those authorized: [[https://www.immediatelyPreviousAuthenticationProxyingService.com, https://secure.com/middleTierService, https://secure.com/userInterface], [https://www.yale.edu/immediatelyPreviousServiceInChain, https://www.princeton.edu/middleware, https://www.northwestern.edu/userInitiallyAuthenticatedToThisApplication]] - considering request unauthorized.
+Sep 10, 2004 4:58:33 PM edu.yale.its.tp.cas.client.filter.ProxyChainScrutinizerFilter doFilter
+INFO: Sending FORBIDDEN.
+Sep 10, 2004 4:58:33 PM edu.yale.its.tp.cas.client.filter.ProxyChainScrutinizerFilter isRequestAuthorized
+INFO: CAS receipt: [edu.yale.its.tp.cas.client.CASReceipt userName=[null] casValidateUrl=[null] proxyCallbackUrl=[null] pgtIou=[null] casValidateUrl=[null] proxyList=[[]]] did not present a proxy chain among those authorized: [[https://www.immediatelyPreviousAuthenticationProxyingService.com, https://secure.com/middleTierService, https://secure.com/userInterface], [https://www.yale.edu/immediatelyPreviousServiceInChain, https://www.princeton.edu/middleware, https://www.northwestern.edu/userInitiallyAuthenticatedToThisApplication]] - considering request unauthorized.
+Sep 10, 2004 4:58:33 PM edu.yale.its.tp.cas.client.filter.ProxyChainScrutinizerFilter doFilter
+INFO: Sending FORBIDDEN.

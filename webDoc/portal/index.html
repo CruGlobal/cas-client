@@ -1,0 +1,86 @@
+<html>
+	<head>
+		<title>Using the CAS client 2.1.0 (rc) in uPortal</title>
+	</head>
+	<body>
+		<h1>Using this CAS client 2.1.0 release candidate in uPortal.</h1>
+		<p>This evolution of the CAS Java client came into being as a client 
+			for use in the YaleInfo Portal for Fall 2004. The YaleCasContext 
+			security context could not accomodate a dynamic parameter on the 
+			Login URL (providing the uP_fname of a channel to be displayed in 
+			focus mode immediately after login) and so did not meet immediate 
+			requirements. There are a number of ways to solve this problem; the 
+			way we ran with was using a CAS client filter to do the actual 
+			ticket validation and a YaleCasFilteredContext, to replace the 
+			YaleCasContext security context, as a consumer of the results of 
+			authentication, which are exposed by StaticCasReceiptCacherFilter 
+			as a CASReceipt.</p>
+		<p>Here is provided some example source code which uses this CASClient 
+			to accomplish these goals.</p>
+		<ul>
+			<li>
+				<a href="./CASProxyTicketAcquisitionException.java"> 
+					CASProxyTicketAcquisitionException </a>
+				<p>A PortalException which Proxy ticket acquiring code will 
+					throw on failure. This exception uses Yale-local ErrorID 
+					Portal error handling, but should be adaptable for use 
+					elsewhere.</p>
+			</li>
+			<li>
+				<a href="./CasConnectionContext.java"> CasConnectionContext </a>
+				<p> This version of the CasConnectionContext looks for 
+					implementations of the IYaleCasContext interface rather 
+					than the YaleCasContext class itself. This allows it to use 
+					the YaleCasFilteredContext for proxy ticket acquisition. 
+					</p>
+			</li>
+			<li>
+				<a href="./IYaleCasContext.java"> IYaleCasContext </a>
+				<p> An interface for security context implementations which 
+					have proxy ticket acquisition capabilities. The 
+					CasConnectionContext now looks for instances of this 
+					interface, rather than only for YaleCasContext instances. 
+					</p>
+			</li>
+			<li>
+				<a href="./YaleCasContext.java"> YaleCasContext </a>
+				<p> Traditional YaleCasContext, modified to fit the new 
+					interface. </p>
+			</li>
+			<li>
+				<a href="./YaleCasContextFactory.java"> YaleCasContextFactory 
+					</a>
+				<p> Traditional factory for the YaleCasContext. </p>
+			</li>
+			<li>
+				<a href="./YaleCasFilteredContext.java"> YaleCasFilteredContext 
+					</a>
+				<p> Akin to the YaleCasContext. Instead of performing ticket 
+					validation itself, this context uses the ticket to query 
+					the StaticReceiptCacherFilter for a CASReceipt 
+					encapsulating the result of prior ticket validation. This 
+					receipt includes the pgtIou, and thereby allows this 
+					context to obtain proxy tickets. </p>
+			</li>
+			<li>
+				<a href="./YaleCasFilteredContextFactory.java"> 
+					YaleCasFilteredContextFactory </a>
+				<p> Factory for the YaleCasFilteredContext. You declare this 
+					factory in your security.properties file to use this 
+					context. </p>
+			</li>
+			<li>
+				<a href="./webxmlFragment.xml"> Sample web.xml fragment </a>
+				<p> This web.xml fragment outlines how one might configure 
+					appropriate filter mappings so that the 
+					YaleCasFilteredContext can succeed. </p>
+			</li>
+			<li>
+				<a href="./security.txt"> Sample security.properties </a>
+				<p> A sample security properties fragment which shows how you 
+					might configure uPortal to use the 
+					YaleCasFilteredContextFactory. </p>
+			</li>
+		</ul>
+	</body>
+</html>

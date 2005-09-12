@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuite errors="0" failures="0" name="edu.yale.its.tp.cas.proxy.ProxyTicketReceptorTest" tests="7" time="0.063">
+  <properties>
+    <property name="java.runtime.name" value="Java(TM) 2 Runtime Environment, Standard Edition"></property>
+    <property name="sun.boot.library.path" value="C:\j2sdk1.4.2_04\jre\bin"></property>
+    <property name="java.vm.version" value="1.4.2_04-b05"></property>
+    <property name="ant.library.dir" value="i:\eclipse\plugins\org.apache.ant_1.6.1\lib"></property>
+    <property name="ant.version" value="Apache Ant version 1.6.1 compiled on February 12 2004"></property>
+    <property name="ant.java.version" value="1.4"></property>
+    <property name="java.vm.vendor" value="Sun Microsystems Inc."></property>
+    <property name="java.vendor.url" value="http://java.sun.com/"></property>
+    <property name="path.separator" value=";"></property>
+    <property name="java.vm.name" value="Java HotSpot(TM) Client VM"></property>
+    <property name="file.encoding.pkg" value="sun.io"></property>
+    <property name="user.country" value="US"></property>
+    <property name="sun.os.patch.level" value="Service Pack 1"></property>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"></property>
+    <property name="user.dir" value="I:\TP\sandybox\javaCasClientHead\javaCasClient"></property>
+    <property name="java.runtime.version" value="1.4.2_04-b05"></property>
+    <property name="java.awt.graphicsenv" value="sun.awt.Win32GraphicsEnvironment"></property>
+    <property name="basedir" value="I:\TP\sandybox\javaCasClientHead\javaCasClient"></property>
+    <property name="java.endorsed.dirs" value="C:\j2sdk1.4.2_04\jre\lib\endorsed"></property>
+    <property name="os.arch" value="x86"></property>
+    <property name="java.io.tmpdir" value="C:\DOCUME~1\awp9\LOCALS~1\Temp\"></property>
+    <property name="line.separator" value="
+"></property>
+    <property name="java.vm.specification.vendor" value="Sun Microsystems Inc."></property>
+    <property name="user.variant" value=""></property>
+    <property name="os.name" value="Windows XP"></property>
+    <property name="ant.home" value="i:\eclipse\plugins\org.apache.ant_1.6.1"></property>
+    <property name="sun.java2d.fontpath" value=""></property>
+    <property name="ant.project.name" value="casclient"></property>
+    <property name="java.library.path" value="C:\j2sdk1.4.2_04\bin;.;C:\WINDOWS\System32;C:\WINDOWS;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\Program Files\SSH Communications Security\SSH Secure Shell"></property>
+    <property name="eclipse.connect.port" value="4536"></property>
+    <property name="java.specification.name" value="Java Platform API Specification"></property>
+    <property name="java.class.version" value="48.0"></property>
+    <property name="java.util.prefs.PreferencesFactory" value="java.util.prefs.WindowsPreferencesFactory"></property>
+    <property name="ant.file.casclient" value="I:\TP\sandybox\javaCasClientHead\javaCasClient\build.xml"></property>
+    <property name="os.version" value="5.1"></property>
+    <property name="ant.file" value="I:\TP\sandybox\javaCasClientHead\javaCasClient\build.xml"></property>
+    <property name="user.home" value="C:\Documents and Settings\awp9"></property>
+    <property name="org.eclipse.ant.ui.ATTR_ANT_PROCESS_ID" value="1094849910567"></property>
+    <property name="user.timezone" value=""></property>
+    <property name="java.awt.printerjob" value="sun.awt.windows.WPrinterJob"></property>
+    <property name="java.specification.version" value="1.4"></property>
+    <property name="file.encoding" value="Cp1252"></property>
+    <property name="java.class.path" value="C:\j2sdk1.4.2_04\lib\tools.jar;I:\source\apache-ant-1.6.1\lib\xml-apis.jar;I:\source\apache-ant-1.6.1\lib\ant.jar;I:\source\apache-ant-1.6.1\lib\ant-antlr.jar;I:\source\apache-ant-1.6.1\lib\ant-apache-bsf.jar;I:\source\apache-ant-1.6.1\lib\ant-apache-resolver.jar;I:\source\apache-ant-1.6.1\lib\ant-commons-logging.jar;I:\source\apache-ant-1.6.1\lib\ant-commons-net.jar;I:\source\apache-ant-1.6.1\lib\ant-icontract.jar;I:\source\apache-ant-1.6.1\lib\ant-jai.jar;I:\source\apache-ant-1.6.1\lib\ant-jakarta-bcel.jar;I:\source\apache-ant-1.6.1\lib\ant-jakarta-log4j.jar;I:\source\apache-ant-1.6.1\lib\ant-jakarta-oro.jar;I:\source\apache-ant-1.6.1\lib\ant-jakarta-regexp.jar;I:\source\apache-ant-1.6.1\lib\ant-javamail.jar;I:\source\apache-ant-1.6.1\lib\ant-jdepend.jar;I:\source\apache-ant-1.6.1\lib\ant-jmf.jar;I:\source\apache-ant-1.6.1\lib\ant-jsch.jar;I:\source\apache-ant-1.6.1\lib\ant-junit.jar;I:\source\apache-ant-1.6.1\lib\ant-launcher.jar;I:\source\apache-ant-1.6.1\lib\ant-netrexx.jar;I:\source\apache-ant-1.6.1\lib\ant-nodeps.jar;I:\source\apache-ant-1.6.1\lib\ant-starteam.jar;I:\source\apache-ant-1.6.1\lib\ant-stylebook.jar;I:\source\apache-ant-1.6.1\lib\ant-swing.jar;I:\source\apache-ant-1.6.1\lib\ant-trax.jar;I:\source\apache-ant-1.6.1\lib\ant-vaj.jar;I:\source\apache-ant-1.6.1\lib\ant-weblogic.jar;I:\source\apache-ant-1.6.1\lib\ant-xalan1.jar;I:\source\apache-ant-1.6.1\lib\ant-xalan2.jar;I:\source\apache-ant-1.6.1\lib\ant-xslp.jar;I:\source\apache-ant-1.6.1\lib\xercesImpl.jar;I:\source\junit3.8.1\junit.jar;I:\eclipse\plugins\org.eclipse.ant.ui_3.0.0\lib\remoteAnt.jar;C:\j2sdk1.4.2_04\lib\tools.jar"></property>
+    <property name="user.name" value="awp9"></property>
+    <property name="java.vm.specification.version" value="1.0"></property>
+    <property name="java.home" value="C:\j2sdk1.4.2_04\jre"></property>
+    <property name="sun.arch.data.model" value="32"></property>
+    <property name="user.language" value="en"></property>
+    <property name="java.specification.vendor" value="Sun Microsystems Inc."></property>
+    <property name="awt.toolkit" value="sun.awt.windows.WToolkit"></property>
+    <property name="java.vm.info" value="mixed mode"></property>
+    <property name="java.version" value="1.4.2_04"></property>
+    <property name="java.ext.dirs" value="C:\j2sdk1.4.2_04\jre\lib\ext"></property>
+    <property name="sun.boot.class.path" value="C:\j2sdk1.4.2_04\jre\lib\rt.jar;C:\j2sdk1.4.2_04\jre\lib\i18n.jar;C:\j2sdk1.4.2_04\jre\lib\sunrsasign.jar;C:\j2sdk1.4.2_04\jre\lib\jsse.jar;C:\j2sdk1.4.2_04\jre\lib\jce.jar;C:\j2sdk1.4.2_04\jre\lib\charsets.jar;C:\j2sdk1.4.2_04\jre\classes"></property>
+    <property name="java.vendor" value="Sun Microsystems Inc."></property>
+    <property name="file.separator" value="\"></property>
+    <property name="java.vendor.url.bug" value="http://java.sun.com/cgi-bin/bugreport.cgi"></property>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"></property>
+    <property name="sun.cpu.endian" value="little"></property>
+    <property name="sun.cpu.isalist" value="pentium i486 i386"></property>
+  </properties>
+  <testcase classname="edu.yale.its.tp.cas.proxy.ProxyTicketReceptorTest" name="testBasicInit" time="0.031"></testcase>
+  <testcase classname="edu.yale.its.tp.cas.proxy.ProxyTicketReceptorTest" name="testNoCasProxyUrlInit" time="0.0"></testcase>
+  <testcase classname="edu.yale.its.tp.cas.proxy.ProxyTicketReceptorTest" name="testContextProxyUrlInit" time="0.0"></testcase>
+  <testcase classname="edu.yale.its.tp.cas.proxy.ProxyTicketReceptorTest" name="testInsecureProxyUrlInit" time="0.0"></testcase>
+  <testcase classname="edu.yale.its.tp.cas.proxy.ProxyTicketReceptorTest" name="testContextInsecureProxyUrlInit" time="0.0"></testcase>
+  <testcase classname="edu.yale.its.tp.cas.proxy.ProxyTicketReceptorTest" name="testReceiveProxyTicket" time="0.0"></testcase>
+  <testcase classname="edu.yale.its.tp.cas.proxy.ProxyTicketReceptorTest" name="testGetUnknownProxyTicket" time="0.016"></testcase>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[Sep 10, 2004 4:58:33 PM edu.yale.its.tp.cas.proxy.ProxyTicketReceptor getProxyTicket
+SEVERE: No ProxyGrantingTicket found for pgtIou=[SPLAT]
+]]></system-err>
+</testsuite>

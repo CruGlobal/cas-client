@@ -1,0 +1,120 @@
+<project name="casclient" default="jar" basedir=".">
+	<!-- CVS metadata:
+	$Revision: 1.3 $
+	$Date: 2004/08/28 22:15:09 $
+	Last modfied by: $Author: awp9 $
+	-->
+
+	<!-- Path used for compiling. -->
+	<path id="compileLib">
+		<fileset dir="lib" />
+	</path>
+
+	<!-- Path used for testing -->
+	<path id="testPath">
+		<fileset dir="lib" />
+		<fileset dir="dist" />
+	</path>
+
+	<!-- prepare directories for build -->
+	<target name="prepare" depends="prepareReports">
+		<mkdir dir="build" />
+		<mkdir dir="build/lib" />
+		<mkdir dir="dist" />
+	</target>
+
+	<target name="compile" depends="prepare" description="Compile the Java into classes.">
+		<javac destdir="build" deprecation="true" debug="on">
+			<classpath refid="compileLib" />
+			<src path="src" />
+			<src path="test" />
+		</javac>
+	</target>
+
+	<target name="jar" depends="compile" description="Jar the classes.">
+		<jar jarfile="dist/casclient.jar" basedir="build" />
+	</target>
+
+	<target name="sourcejar" depends="prepare" description="Jar up the source code.">
+		<jar jarfile="dist/source.jar" basedir="src" />
+		<jar jarfile="dist/testsource.jar" basedir="test" />
+	</target>
+
+	<target name="doc" depends="prepare" description="Build the JavaDoc.">
+		<mkdir dir="doc/public" />
+		<mkdir dir="doc/all" />
+		<javadoc sourcepath="src" destdir="doc/all" access="private">
+			<classpath refid="testPath" />
+			<doctitle>Central Authentication Service Client JavaDoc - All Access</doctitle>
+			<package name="*" />
+		</javadoc>
+		<javadoc sourcepath="test" destdir="doc/testall" access="private">
+			<classpath refid="testPath" />
+			<doctitle>Central Authentication Service Client TestCases JavaDoc - All Access</doctitle>
+			<package name="*" />
+		</javadoc>
+		<javadoc sourcepath="src" destdir="doc/public" access="public">
+			<classpath refid="testPath" />
+			<doctitle>Central Authentication Service Client JavaDoc - Public API</doctitle>
+			<package name="*" />
+		</javadoc>
+	</target>
+
+	<target name="clean" depends="cleanReports" description="Remove derived files.">
+		<delete dir="build" />
+		<delete dir="doc" />
+		<delete file="dist/casclient.jar" />
+		<delete file="lib/casclient.jar" />
+	</target>
+
+	<target name="cleanReports" description="Remove test results.">
+		<delete>
+			<fileset dir="report" includes="**/*.xml" />
+			<fileset dir="report" includes="**/*.html" />
+			<fileset dir="report" includes="**/*.css" />
+		</delete>
+		<delete>
+			<fileset dir="reports" includes="**/*.xml" />
+			<fileset dir="reports" includes="**/*.html" />
+			<fileset dir="reports" includes="**/*.css" />
+		</delete>
+		<mkdir dir="reports" />
+		<mkdir dir="report" />
+	</target>
+
+	<target name="prepareReports">
+		<mkdir dir="reports" />
+		<mkdir dir="report" />
+	</target>
+
+	<target name="test" depends="compile,cleanReports,prepareReports,jar" description="Run the unit tests.">
+		<junit printsummary="true">
+			<formatter type="xml" />
+			<classpath refid="testPath" />
+			<batchtest fork="no" todir="reports">
+
+				<fileset dir="build">
+					<include name="**/*Test*.java" />
+					<include name="**/*Test*.class" />
+					<exclude name="**/AllTests.java" />
+					<exclude name="**/AllTests.class" />
+				</fileset>
+			</batchtest>
+		</junit>
+		<junitreport todir="report">
+			<fileset dir="reports">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report format="frames" todir="./report/html" />
+		</junitreport>
+	</target>
+
+	<target name="testAndDoc" depends="test,doc" description="Run the unit tests and build the JavaDoc.">
+
+	</target>
+
+	<target name="all" depends="test,doc,sourcejar,jar" description="Run the unit tests, build the JavaDoc, build a .jar of the source code, and build a .jar of the classes.">
+
+	</target>
+
+</project>

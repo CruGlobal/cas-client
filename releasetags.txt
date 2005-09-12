@@ -1,0 +1,7 @@
+This file is to record the use of CVS release tags for this project.
+
+prod-2-1-0
+Version 2.1.0 production release.
+
+rc2-1-0
+Version 2.1.0 release candidate.

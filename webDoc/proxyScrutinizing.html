@@ -1,0 +1,78 @@
+<html>
+	<head>
+		<title>Scrutinizing Proxy Chains</title>
+	</head>
+	<body>
+		<h1>Scrutinizing Proxy Chains</h1>
+		<p>This Java CAS client alpha distribution includes a ProxyChainScrutinizerFilter that is perhaps worth some discussion.</p>
+		<p>On the CAS discussion list (cas at tp.its.yale.edu), Bill Dimmick wrote expressing a desire to consider more than just
+			the immediately previous entry in the CAS proxy chain in determining whether to accept authentication proxied through some
+			chain of services to a (presumably back-end) application/service.</p>
+		<h2>Motivation</h2>
+		<p>My (Andrew's) first inclination was to characterize the CAS client 2.0.11 behavior of allowing consideration of only the most previous entry in the proxy chain
+			as a feature, rather than a bug.  I was convinced off-list that there is actually a use case for consideration of more than just the immediately previous entry in the chain.
+			Suppose you have a CASified IMAP server, a CASified Java Servlet which translates IMAP data into friendly XML, and two Portals which
+			wish to display a Recent Email portal channel.  The middle service (the Java Servlet) might want to accept proxied authentication for both Portals, since
+			it serves up email to both for some users and it itself has no way of determining, let us say, whether for a particular user it will be able to obtain
+			the email to vend to a particular requesting portal.  The backend IMAP server, however, might be configured to consider the full Proxy Chain
+			in determining whether to authorize the proxied authentication -- perhaps administrator's email can only be viewed in an administrative Portal whereas
+			a student Portal can proxy authentication to obtain students' email.</p>
+		<h2>Implementation - How can a filter do this</h2>
+		<p>How is it possible to accomplish the goal of discrimination among proxy chains in consideration of 
+			not just the most previous service in the chain, without adding this functionality to the CASFilter itself?</p>
+		<p>The Java casclient CASFilter 2.1.0 (release candidate) exposes the results of ticket validation as a CASReceipt.  The CASReceipt includes the 
+			proxy chain as described in the CAS proxy ticket validation response.  This proxy chain is available to subsequent filters 
+			and servlets in the request 
+			processing chain.  In particular, it is available so that a subsequent filter can scrutinize the proxy chain to determine
+			whether the request is authorized.</p>
+		<h2>Implementation - Why use a Filter?</h2>
+		<p>Why use a filter instead of hacking  or extending the CASFilter class?</p>
+		<h3>Filters are deploy-time configuration friendly</h3>
+		<p>Configuring restrictions on proxied authentication by means of mapping Filters provides
+			declarative configuration, allowing more flexibility in accomodating configuration and policy adjustments.</p>
+		<h3>Filters make available the full power of Java</h3>
+		<p>While I have written a ProxyChainScrutinizingFilter that will accomodate a common use case of examining more than just the previous
+			entry in the proxy chain, this approach is by no means limited to the meager Filter I have written.
+			In general, one could write a Filter that considered the identity of the user whose authentication is proxied, 
+			a database, the date and time, other session and request attributes, or anything else available in the context of a Servlet Container.
+			And the full expressive power of the Java programming language is available to compose logic operating on the available data.
+			Finally, a broad range of possible responses is available, including wrapping or redirecting requests or responses, opting out of the 
+			filter chain and forwarding directly to a servlet to compose the response, throwing a custom exception, etc.</p>
+		<p>Adding a Filter subsequent to the CASFilter in the request processing chain provides more flexibility.</p>
+		<h3>Composable filters help keep each filter small</h3>
+		<p>An approach of composing filters to produce the desired result allows each filter to remain smaller, simpler, and more testable.</p>
+		<h3>Filters are just cool!</h3>
+		<p>To some extent, it's an aesthetic: composing filters appeals more to me than does extending classes.</p>
+		<h2>A utility Filter: ProxyChainScrutinizerFilter</h2>
+		<h3>Deployment</h3>
+		<p>The ProxyChainScrutinizerFilter should be mapped after the CASFilter as it requires the CASFilter's CASReceipt 
+			to already be set as an attribute of the session in order for it to have anything to scrutinize.</p>
+		<p>The Filter is configured by an initialization parameter named edu.yale.its.tp.cas.client.filter.authorizedProxyChains . 
+			The Filter attempts to do some error checking of this parameter on initialization.</p>
+		<p>In the simplest deployment, the value of the parameter can be a whitespace delimited list of authorized proxies in the one proxy chain you would like to authorize.</p>
+		<p>The chain should be specified in the same order it is specified by CAS upon proxy ticket validation -- from most previous service in the proxy chain back through any intermediary services in order back to finally the
+			service to which the user presented her original Service Ticket.</p>
+		<p>To authorize multiple proxy chains, simply place a semicolon - being sure to leave whitespace both before and after the semicolon so it is not parsed as part of a URL in a chain -
+			between successive authorized proxy chains.</p>
+		<p>Service tickets have empty proxy chains.  If you do not specify the empty chain as authorized, service ticekts will not be authorized.  To authorize
+			the empty service ticket chain, the easyist thing to do is lead your list of authorized proxies with a semicolon, which terminates the first (empty) list of authorized proxies.</p>
+		<h3>Behavior</h3>
+		<p>There are two behaviors of the Filter: passing the request through the filter chain, and sending the response error code FORBIDDEN.</p>
+		<p>It will pass the request along the chain if and only if it retrieves from the Session a CASReceipt the Proxy Chain of which is among those
+			the Filter is configured to authorize.  In all other cases it aborts the FilterChain and sends a FORBIDDEN.</p>
+		<h3>More information</h3>
+		<p>Please see the testcase sourcecode for code that exercises the Filter and demonstrates its behavior, and of course see the ProxyChainScrutinizerFilter code itself.</p>
+		<h4>Contact information:</h4>
+		<p>I hope this exposition of the potential of using successive, composable Filters to configure behavior and the accompanying concrete code
+			will be interesting or useful to the CAS community.</p>
+		<p>This page originally authored by: Andrew Petro: microcline at gmail dot com</p>
+		<p>CAS project maintainer: drew dot mazurek at yale dot edu</p>
+		<h4>CVS metadata</h4>
+		<p>
+			$Revision: 1.2 $ $Date: 2004/08/28 22:18:10 $
+		</p>
+		<p>
+			Last modified by: $Author: awp9 $
+		</p>
+	</body>
+</html>

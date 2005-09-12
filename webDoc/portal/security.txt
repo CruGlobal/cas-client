@@ -1,0 +1,12 @@
+# Sample security.properties fragment
+
+# This is the factory that supplies the concrete authentication class
+root=org.jasig.portal.security.provider.UnionSecurityContextFactory
+root.simple=org.jasig.portal.security.provider.SimpleSecurityContextFactory
+root.cas=org.jasig.portal.security.provider.YaleCasFilteredContextFactory
+
+# Answers what tokens are examined in the request for each context during authentication.
+# A subcontext only needs to set its tokens if it differs from those of the root context.
+principalToken.root=userName
+credentialToken.root=password
+credentialToken.root.cas=ticket

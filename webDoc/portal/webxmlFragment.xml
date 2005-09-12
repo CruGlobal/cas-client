@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<!DOCTYPE web-app
+    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+    "http://java.sun.com/dtd/web-app_2_3.dtd">
+    
+<!-- this is a web.xml fragment showing how to configure the filters to enable
+ YaleCasFilteredContext security context to authenticate by lookup in the
+  CAS Receipt Cacher -->
+
+<web-app>
+
+	<filter>
+		<filter-name>CAS Validate Filter</filter-name>
+		<filter-class>edu.yale.its.tp.cas.client.filter.CASValidateFilter</filter-class>
+		<init-param>
+			<param-name>edu.yale.its.tp.cas.client.filter.validateUrl</param-name>
+			<param-value>https://secure.its.yale.edu/cas/serviceValidate</param-value>
+		</init-param>
+		<init-param>
+			<param-name>edu.yale.its.tp.cas.client.filter.serverName</param-name>
+			<param-value>hkg2.cis.yale.edu:8080</param-value>
+		</init-param>
+		<init-param>
+			<param-name>edu.yale.its.tp.cas.client.filter.proxyCallbackUrl</param-name>
+			<param-value>https://hkg2.cis.yale.edu:8080/uPortal/CasProxyServlet</param-value>
+		</init-param>
+	</filter>
+
+	<filter>
+		<filter-name>CAS Receipt Cacher</filter-name>
+		<filter-class>edu.yale.its.tp.cas.client.filter.StaticCasReceiptCacherFilter</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>CAS Validate Filter</filter-name>
+		<url-pattern>/Login</url-pattern>
+	</filter-mapping>
+
+	<filter-mapping>
+		<filter-name>CAS Receipt Cacher</filter-name>
+		<url-pattern>/Login</url-pattern>
+	</filter-mapping>
+
+  <servlet>
+    <servlet-name>uPortal</servlet-name>
+    <servlet-class>org.jasig.portal.PortalSessionManager</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <servlet>
+    <servlet-name>Login</servlet-name>
+    <servlet-class>org.jasig.portal.LoginServlet</servlet-class>
+    <load-on-startup>2</load-on-startup>
+  </servlet>
+
+
+
+  <servlet>
+    <servlet-name>CasProxyServlet</servlet-name>
+    <servlet-class>edu.yale.its.tp.cas.proxy.ProxyTicketReceptor</servlet-class>
+	<init-param>
+		<param-name>edu.yale.its.tp.cas.proxyUrl</param-name>
+		<param-value>https://secure.its.yale.edu/cas/proxy</param-value>
+	</init-param>
+    <load-on-startup>4</load-on-startup>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>uPortal</servlet-name>
+    <url-pattern>*.uP</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>Login</servlet-name>
+    <url-pattern>/Login</url-pattern>
+  </servlet-mapping>
+
+  
+  <servlet-mapping>
+    <servlet-name>CasProxyServlet</servlet-name>
+    <url-pattern>/CasProxyServlet</url-pattern>
+  </servlet-mapping>  
+
+</web-app>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+    <classpathentry kind="src" path="src"/>
+    <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+    <classpathentry kind="lib" path="I:/Tomcat/tomcat4124/common/lib/servlet.jar"/>
+    <classpathentry kind="lib" path="lib/commons-logging-api.jar" sourcepath="I:/source/commons-logging-1.0.3-src/src"/>
+    <classpathentry kind="lib" path="lib/mockrunner.jar" sourcepath="I:/source/mockrunner-0.2.8/src"/>
+    <classpathentry kind="src" path="test"/>
+    <classpathentry kind="lib" path="lib/junit.jar" sourcepath="I:/source/junit3.8.1/src.jar"/>
+    <classpathentry kind="output" path="bin"/>
+</classpath>

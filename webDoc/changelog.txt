@@ -1,0 +1,23 @@
+
+This Java CAS Client 2.1.0 release evolved from Andrew Petro's "Java CAS Client alpha" release.
+This changelog is a legacy from that beginning that is included here only as background information.
+
+=========================
+The Java CAS Client alpha evolved since it was originally posted.
+Some effort was made to record changes here.
+
+Most recent changes at top of list.
+
+This file: last edited by: $Author: awp9 $
+$Revision: 1.5 $ $Date: 2004/09/10 20:57:18 $
+
+September 10, 2004: This release becomes Java CAS Client 2.1.0
+  Updated client utils testcase.
+  Improved documentation of CasValidateFilter
+
+August 27, 2004: This release becomes Java CAS Client 2.1.0 release candidate
+August 17, 2004: Added ProxyChainScrutinizerFilter.
+August 8, 2004: Changed ProxyTicketReceptor to allow multiple instantiation with different casProxyUrls.
+August 6, 2004: Added ProxyEchoFilter and example application to demonstrate it.
+July 18, 2004: Added testcases for ProxyTicketReceptor.  Exercises the July 16 fix.  All appears to be well. -awp
+July 16, 2004: fixed initialization check in ProxyTicketReceptor.  Previously would always fail.  Mea culpa.  -awp

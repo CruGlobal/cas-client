@@ -1,0 +1,46 @@
+[Readme file inherited from CAS Client Beta 2.0.12 Beta 2, upon which this
+CAS Client 2.1.0 builds.]
+
+The Java client includes an API whose cornerstone is a JavaBean interface
+for ticket validation.  This low-level API is wrapped in a JSP tag library
+and a Servlet 2.3 filter.  To configure the filter, add elements like the
+following to your web application:
+
+  <filter>
+    <filter-name>CAS Filter</filter-name>
+    <filter-class>edu.yale.its.tp.cas.client.filter.CASFilter</filter-class>
+    <init-param>
+      <param-name>edu.yale.its.tp.cas.client.filter.loginUrl</param-name>
+      <param-value>https://secure.its.yale.edu/cas/login</param-value>
+    </init-param>
+    <init-param>
+      <param-name>edu.yale.its.tp.cas.client.filter.validateUrl</param-name>
+      <param-value>https://secure.its.yale.edu/cas/proxyValidate</param-value>
+    </init-param>
+    <init-param>
+      <param-name>edu.yale.its.tp.cas.client.filter.serverName</param-name>
+      <param-value>portal1.wss.yale.edu:8888</param-value>
+    </init-param>
+  </filter>
+
+  <filter-mapping>
+    <filter-name>CAS Filter</filter-name>
+    <url-pattern>/casified/*</url-pattern>
+  </filter-mapping>
+
+The loginUrl and validateUrl parameters correspond to the CAS URLs used
+for redirection and ticket validation, respectively.  The serverName
+parameter lets you specify the name of the server (plus an optional port)
+on which your service runs; this is more secure than determining the
+server name automatically.  Alternatively, you may specify a serviceUrl
+parameter, which contains a complete URL to the page in your service to
+which you want CAS to return the user upon authentication.  (Otherwise,
+the filter will instruct CAS to redirect the user to the page that the
+user originally accessed.)
+
+To use the CAS tag library, look at the included Tag Library Descriptor
+(TLD).
+
+CVS metadata:
+$Revision: 1.4 $ $Date: 2004/09/10 20:55:09 $
+Last modified by: $Author: awp9 $
