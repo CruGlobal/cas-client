@@ -9,7 +9,9 @@ package edu.yale.its.tp.cas.client;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,6 +25,9 @@ import org.apache.commons.logging.LogFactory;
 public class CASReceipt {
 
     private static Log log = LogFactory.getLog(CASReceipt.class);
+
+    // CCCI
+    private Map attributes = new HashMap();
 
     /**
      * Get a CASReceipt from a ProxyTicketValidator. While the ptv properties
@@ -70,6 +75,10 @@ public class CASReceipt {
         receipt.proxyCallbackUrl = ptv.getProxyCallbackUrl();
         receipt.proxyList = ptv.getProxyList();
         receipt.primaryAuthentication = ptv.isRenew();
+        // CCCI
+        receipt.attributes.putAll(ptv.getAttributes());
+        // CCCI
+        receipt.serviceTicket = ptv.getSt();
 
         if (!receipt.validate()) {
             throw new CASAuthenticationException(
@@ -108,6 +117,10 @@ public class CASReceipt {
 
     /** The authenticated username. */
     private String userName;
+    
+    // CCCI
+    /** The service ticket that issued this receipt */
+    private String serviceTicket;
 
     /**
      * Do-nothing constructor. You probably want to call
@@ -204,6 +217,24 @@ public class CASReceipt {
         return (String) proxyList.get(0);
     }
 
+    /**
+     * CCCI
+     * @return Returns the attributes.
+     */
+    public Map getAttributes()
+    {
+        return attributes;
+    }
+    
+    /**
+     * CCCI
+     * @return Returns the serviceTicket.
+     */
+    public String getServiceTicket()
+    {
+        return serviceTicket;
+    }
+    
     /**
      * @param casValidateUrl
      *            The casValidateUrl to set.

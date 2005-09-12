@@ -34,6 +34,8 @@ package edu.yale.its.tp.cas.client;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
@@ -85,6 +87,8 @@ public class ServiceTicketValidator {
   private boolean attemptedAuthentication;
   private boolean successfulAuthentication;
 
+  // CCCI
+  private Map attributes = new HashMap();
 
   //*********************************************************************
   // Accessors
@@ -187,6 +191,24 @@ public class ServiceTicketValidator {
     return this.entireResponse;
   }
 
+  /**
+   * CCCI
+   * @return Returns the user's attributes, if the authentication was
+   * successful.
+   */
+  public Map getAttributes()
+  {
+      return attributes;
+  }
+
+  /**
+   * CCCI
+   * @return Returns the st.
+   */
+  public String getSt()
+  {
+      return st;
+  }
 
   //*********************************************************************
   // Actuator
@@ -242,6 +264,8 @@ public class ServiceTicketValidator {
     protected static final String PROXY_GRANTING_TICKET =
       "cas:proxyGrantingTicket";
     protected static final String USER = "cas:user";
+    // CCCI
+    protected static final String ATTRS = "cas:attributes";
 
     //**********************************************
     // Parsing state
@@ -249,7 +273,10 @@ public class ServiceTicketValidator {
     protected StringBuffer currentText = new StringBuffer();
     protected boolean authenticationSuccess = false;
     protected boolean authenticationFailure = false;
-    protected String netid, pgtIou, errorCode, errorMessage;
+    // CCCI - commented these out
+    //protected String netid, pgtIou, errorCode, errorMessage;
+    // CCCI
+    protected boolean insideAttrs = false;
     
 
     //**********************************************
@@ -268,6 +295,11 @@ public class ServiceTicketValidator {
         if (errorCode != null)
           errorCode = errorCode.trim();
       }
+      // CCCI
+      else if (qn.equals(ATTRS))
+      {
+          insideAttrs = true;
+      }
     }
 
     public void characters(char[] ch, int start, int length) {
@@ -280,6 +312,17 @@ public class ServiceTicketValidator {
       if (authenticationSuccess) {
         if (qn.equals(USER))
           user = currentText.toString().trim();
+
+        //NK
+        else if (qn.equals(ATTRS))
+        {
+            insideAttrs = true;
+        }
+        else if (insideAttrs)
+        {
+            attributes.put(qn, currentText.toString().trim());
+        }
+        
         if (qn.equals(PROXY_GRANTING_TICKET))
           pgtIou = currentText.toString().trim();
       } else if (authenticationFailure) {
@@ -291,13 +334,19 @@ public class ServiceTicketValidator {
     public void endDocument() throws SAXException {
       // save values as appropriate
       if (authenticationSuccess) {
-        ServiceTicketValidator.this.user = user;
-        ServiceTicketValidator.this.pgtIou = pgtIou;
-        ServiceTicketValidator.this.successfulAuthentication = true;
+          // CCCI
+          successfulAuthentication = true;
+          // CCCI - commented these out
+//        ServiceTicketValidator.this.user = user;
+//        ServiceTicketValidator.this.pgtIou = pgtIou;
+//        ServiceTicketValidator.this.successfulAuthentication = true;
       } else if (authenticationFailure) {
-        ServiceTicketValidator.this.errorMessage = errorMessage;
-        ServiceTicketValidator.this.errorCode = errorCode;
-        ServiceTicketValidator.this.successfulAuthentication = false;
+          // CCCI
+          successfulAuthentication = false;
+          // CCCI - commented these out
+//        ServiceTicketValidator.this.errorMessage = errorMessage;
+//        ServiceTicketValidator.this.errorCode = errorCode;
+//        ServiceTicketValidator.this.successfulAuthentication = false;
       } else
         throw new SAXException("no indication of success or failure from CAS");
     }
@@ -313,6 +362,8 @@ public class ServiceTicketValidator {
    user = pgtIou = errorMessage = null;
    attemptedAuthentication = false;
    successfulAuthentication = false;
+   // CCCI
+   attributes.clear();
   }
 
 /**

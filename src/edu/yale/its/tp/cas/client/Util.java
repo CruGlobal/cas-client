@@ -58,18 +58,31 @@ public class Util {
     }
       	
     // ensure we have a server name
-    if (server == null) {
-    	log.error("getService() argument \"server\" was illegally null.");
-			throw new IllegalArgumentException("name of server is required");
-    }
+    // CCCI commented this out
+//    if (server == null) {
+//    	log.error("getService() argument \"server\" was illegally null.");
+//			throw new IllegalArgumentException("name of server is required");
+//    }
 
 
     // now, construct our best guess at the string
     StringBuffer sb = new StringBuffer();
+    // CCCI TODO - add "secure through proxy" ability
     if (request.isSecure())
       sb.append("https://");
     else
       sb.append("http://");
+    // CCCI - added this section
+    if(server==null)
+    {
+        server = request.getServerName();
+        int port = request.getServerPort();
+        if(port != 80 && port != 443)
+        {
+            server+=':';
+            server+=port;
+        }
+    }
     sb.append(server);
     sb.append(request.getRequestURI());
 

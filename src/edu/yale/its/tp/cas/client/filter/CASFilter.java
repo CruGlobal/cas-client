@@ -7,6 +7,7 @@ package edu.yale.its.tp.cas.client.filter;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+
 import javax.servlet.*;
 import javax.servlet.http.*;
 import edu.yale.its.tp.cas.client.*;
@@ -130,6 +131,13 @@ public class CASFilter implements Filter {
      */
     public final static String PROXY_CALLBACK_INIT_PARAM = "edu.yale.its.tp.cas.client.filter.proxyCallbackUrl";
     
+    /** 
+     * CCCI
+     * The name of the filter initialization parameter the value of which is the value the Filter
+     * should send for the logout callback url.
+     */
+    public final static String LOGOUT_CALLBACK_INIT_PARAM = "edu.yale.its.tp.cas.client.filter.logoutCallbackUrl";
+
     /** The name of the filter initialization parameter the value of which indicates
      * whether this filter should wrap requests to expose the authenticated username.
      */
@@ -153,6 +161,13 @@ public class CASFilter implements Filter {
         "edu.yale.its.tp.cas.client.filter.receipt";
     
     /**
+     * CCCI
+     * Session attribute to indicate that the receipt is fresh
+     */
+    public final static String CAS_FILTER_RECEIPT_IS_FRESH =
+        "edu.yale.its.tp.cas.client.filter.receiptIsFresh";
+
+    /**
      * Session attribute in which internally used gateway
      * attribute is stored.
      */
@@ -173,6 +188,8 @@ public class CASFilter implements Filter {
     private String casServerName;
     /** Secure URL whereto this filter should ask CAS to send Proxy Granting Tickets. */
     private String casProxyCallbackUrl;
+    /** Secure URL whereto this filter should ask CAS to send logout commands. */
+    private String casLogoutCallbackUrl;
     
     /** True if renew parameter should be set on login and validate */
     private boolean casRenew;
@@ -188,6 +205,12 @@ public class CASFilter implements Filter {
      * behind this filter.
      */
     private List authorizedProxies = new ArrayList();
+
+    /**
+     * List of tickets that are pending logout.  The next time the user
+     * appears, they will be logged out.
+     */
+    private static List logoutList = new ArrayList();
 
     //*********************************************************************
     // Initialization 
@@ -213,6 +236,9 @@ public class CASFilter implements Filter {
         casProxyCallbackUrl =
             config.getInitParameter(
                 PROXY_CALLBACK_INIT_PARAM);
+        casLogoutCallbackUrl =
+            config.getInitParameter(
+                LOGOUT_CALLBACK_INIT_PARAM);
         wrapRequest =
             Boolean
                 .valueOf(
@@ -232,9 +258,10 @@ public class CASFilter implements Filter {
         if (casServerName != null && casServiceUrl != null) {
             throw new ServletException("serverName and serviceUrl cannot both be set: choose one.");
         }
-        if (casServerName == null && casServiceUrl == null) {
-            throw new ServletException("one of serverName or serviceUrl must be set.");
-        }
+        // CCCI - commented this out
+//        if (casServerName == null && casServiceUrl == null) {
+//            throw new ServletException("one of serverName or serviceUrl must be set.");
+//        }
         if (casServiceUrl != null){
             if (! (casServiceUrl.startsWith("https://")|| (casServiceUrl.startsWith("http://") ))){
                 throw new ServletException("service URL must start with http:// or https://; its current value is [" + casServiceUrl + "]");
@@ -302,6 +329,16 @@ public class CASFilter implements Filter {
             return;
         }
 
+        // CCCI
+        // Is this a request for logout?  If so, process it
+        if (request.getParameter("ticket") != null
+            && request.getParameter("ticket").startsWith("-"))
+        {
+           	log.trace("processing logout request.");
+           	queueForLogout(request, response);
+            return;
+        }
+        
         // Wrap the request if desired
         if (wrapRequest) {
         		log.trace("Wrapping request with CASFilterRequestWrapper.");
@@ -309,17 +346,29 @@ public class CASFilter implements Filter {
         }
 
         HttpSession session = ((HttpServletRequest) request).getSession();
+        
+        CASReceipt receipt = (CASReceipt) session.getAttribute(CAS_FILTER_RECEIPT);
+
+        // CCCI
+    	// if our attribute's already present but queued for logout, then handle
+        // the logout
+        if (receipt != null && isReceiptQueuedForLogout(receipt))
+        {
+            handleActualLogout(request, response);
+            receipt = null;
+        }
+            
+        
+        // otherwise, we need to authenticate via CAS
+        String ticket = request.getParameter("ticket");
 
         // if our attribute's already present and valid, pass through the filter chain
-        CASReceipt receipt = (CASReceipt) session.getAttribute(CAS_FILTER_RECEIPT);
-        if (receipt != null && isReceiptAcceptable(receipt)) {
+        if (ticket==null && receipt != null && isReceiptAcceptable(receipt)) {
         		log.trace("CAS_FILTER_RECEIPT attribute was present and acceptable - passing  request through filter..");
+            session.removeAttribute(CAS_FILTER_RECEIPT_IS_FRESH);
             fc.doFilter(request, response);
             return;
         }
-
-        // otherwise, we need to authenticate via CAS
-        String ticket = request.getParameter("ticket");
 
         // no ticket?  abort request processing and redirect
         if (ticket == null || ticket.equals("")) {
@@ -389,6 +438,7 @@ public class CASFilter implements Filter {
         if (session != null) { // probably unnecessary
             session.setAttribute(CAS_FILTER_USER, receipt.getUserName());
             session.setAttribute(CASFilter.CAS_FILTER_RECEIPT, receipt);
+            session.setAttribute(CAS_FILTER_RECEIPT_IS_FRESH, Boolean.TRUE);
             // don't store extra unnecessary session state
             session.removeAttribute(
                 CAS_FILTER_GATEWAYED);
@@ -400,6 +450,47 @@ public class CASFilter implements Filter {
         // continue processing the request
         fc.doFilter(request, response);
         log.trace("returning from doFilter()");
+    }
+
+    /**
+     * CCCI
+     * @param request
+     * @param response
+     */
+    private void handleActualLogout(ServletRequest request, ServletResponse response)
+    {
+        HttpServletRequest req = (HttpServletRequest)request;
+        
+        // clear the session
+        String[] vals = req.getSession().getValueNames();
+        for(int i=0; i<vals.length; i++)
+        {
+            req.getSession().removeValue(vals[i]);
+        }
+        //req.getSession().setAttribute("casLogoutInitiated",Boolean.TRUE);
+    }
+
+    /**
+     * CCCI
+     * @param receipt
+     * @return
+     */
+    private boolean isReceiptQueuedForLogout(CASReceipt receipt)
+    {
+        String ticket = receipt.getServiceTicket();
+        return logoutList.contains(ticket);
+    }
+
+    /**
+     * CCCI
+     * @param request
+     * @param response
+     */
+    private void queueForLogout(ServletRequest request, ServletResponse response)
+    {
+        String ticket = request.getParameter("ticket");
+        ticket = ticket.substring(1); // remove the leading "-"
+        logoutList.add(ticket);
     }
 
     /**
@@ -467,18 +558,22 @@ public class CASFilter implements Filter {
         String serviceString;
 
         // ensure we have a server name or service name
-        if (casServerName == null && casServiceUrl == null)
-            throw new ServletException(
-                "need one of the following configuration "
-                    + "parameters: edu.yale.its.tp.cas.client.filter.serviceUrl or "
-                    + "edu.yale.its.tp.cas.client.filter.serverName");
+        // CCCI commented this out
+//        if (casServerName == null && casServiceUrl == null)
+//            throw new ServletException(
+//                "need one of the following configuration "
+//                    + "parameters: edu.yale.its.tp.cas.client.filter.serviceUrl or "
+//                    + "edu.yale.its.tp.cas.client.filter.serverName");
 
         // use the given string if it's provided
         if (casServiceUrl != null)
             serviceString = URLEncoder.encode(casServiceUrl);
         else
+        {
             // otherwise, return our best guess at the service
             serviceString = Util.getService(request, casServerName);
+        }
+        
         if (log.isTraceEnabled()) {
             log.trace(
                 "returning from getService() with service ["
