@@ -27,9 +27,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * CCCI
- * 
+ * CCCI<br/>
+ * <br/>
  * A filter to echo logout requests to other instances operating behind a load balancer.
+ * This is copied from ProxyEchoFilter.
+ * 
  * @author andrew.petro@yale.edu
  * @author Nathan.Kopp@ccci.org
  */
@@ -38,11 +40,11 @@ public class LogoutEchoFilter implements Filter {
     
     /**
      * The name of the filter initialization parameter the value of which must be a 
-     * whitespace-delimited list of targets to which the PGTIOUs and PGTIDs should be echoed.
+     * whitespace-delimited list of targets to which the logout requests should be echoed.
      * 
      * Uses the same settings as the proxy echo filter
      */
-    public static final String INIT_PARAM_ECHO_TARGETS = "edu.yale.its.tp.cas.proxy.echo.targets";
+    public static final String INIT_PARAM_ECHO_TARGETS = "edu.yale.its.tp.cas.logout.echo.targets";
     
     /**
      * The set of PGTIOUs received so far.
@@ -113,10 +115,10 @@ public class LogoutEchoFilter implements Filter {
             StringBuffer target = new StringBuffer((String) iter.next());
             
             
-            Enumeration enum = request.getAttributeNames();
-            for(;enum.hasMoreElements();)
+            Enumeration enumeration = request.getAttributeNames();
+            for(;enumeration.hasMoreElements();)
             {
-                String name = (String)enum.nextElement();
+                String name = (String)enumeration.nextElement();
                 if(target.indexOf("?")>-1)
                     target.append("?");
                 else
