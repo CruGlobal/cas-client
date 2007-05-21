@@ -603,6 +603,9 @@ public class CASFilter implements Filter {
                     : "")
                 + (casGateway ? "&gateway=true" : "");
 
+        if(casLogoutCallbackUrl != null)
+            casLoginString  += "&logoutCallback=" + casLogoutCallbackUrl;
+
         if (log.isDebugEnabled()) {
             log.debug("Redirecting browser to [" + casLoginString + ")");
         }
