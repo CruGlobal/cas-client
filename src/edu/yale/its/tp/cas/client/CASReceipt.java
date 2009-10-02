@@ -7,6 +7,7 @@
  */
 package edu.yale.its.tp.cas.client;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,7 +23,9 @@ import org.apache.commons.logging.LogFactory;
  * @author andrew.petro@yale.edu
  * @version $Revision: 1.2 $ $Date: 2004/07/14 22:58:07 $
  */
-public class CASReceipt {
+public class CASReceipt implements Serializable 
+{
+    private static final long serialVersionUID = 1L;
 
     private static Log log = LogFactory.getLog(CASReceipt.class);
 

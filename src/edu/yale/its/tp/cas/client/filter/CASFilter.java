@@ -166,6 +166,8 @@ public class CASFilter implements Filter {
      */
     public final static String CAS_FILTER_RECEIPT_IS_FRESH =
         "edu.yale.its.tp.cas.client.filter.receiptIsFresh";
+    public final static String CAS_FILTER_RECEIPT_IS_FRESH_BEFORE_REDIRECT =
+        "edu.yale.its.tp.cas.client.filter.receiptIsFreshBeforeRedirect";
 
     /**
      * Session attribute in which internally used gateway
@@ -201,12 +203,15 @@ public class CASFilter implements Filter {
     private boolean casGateway = false;
     
     /**
+     * CCCI 
      * List of ProxyTicketReceptor URLs of services authorized to proxy to the path
      * behind this filter.
      */
     private List authorizedProxies = new ArrayList();
 
     /**
+     * CCCI
+     * 
      * List of tickets that are pending logout.  The next time the user
      * appears, they will be logged out.
      */
@@ -362,10 +367,18 @@ public class CASFilter implements Filter {
         // otherwise, we need to authenticate via CAS
         String ticket = request.getParameter("ticket");
 
+        // CCCI
         // if our attribute's already present and valid, pass through the filter chain
         if (ticket==null && receipt != null && isReceiptAcceptable(receipt)) {
         		log.trace("CAS_FILTER_RECEIPT attribute was present and acceptable - passing  request through filter..");
-            session.removeAttribute(CAS_FILTER_RECEIPT_IS_FRESH);
+        	if(session.getAttribute(CAS_FILTER_RECEIPT_IS_FRESH_BEFORE_REDIRECT)!=null)
+        	{
+        	    session.removeAttribute(CAS_FILTER_RECEIPT_IS_FRESH_BEFORE_REDIRECT);
+        	}
+        	else
+        	{
+        	    session.removeAttribute(CAS_FILTER_RECEIPT_IS_FRESH);
+        	}
             fc.doFilter(request, response);
             return;
         }
@@ -438,10 +451,11 @@ public class CASFilter implements Filter {
         if (session != null) { // probably unnecessary
             session.setAttribute(CAS_FILTER_USER, receipt.getUserName());
             session.setAttribute(CASFilter.CAS_FILTER_RECEIPT, receipt);
+            // CCCI
             session.setAttribute(CAS_FILTER_RECEIPT_IS_FRESH, Boolean.TRUE);
+            session.setAttribute(CAS_FILTER_RECEIPT_IS_FRESH_BEFORE_REDIRECT, Boolean.TRUE);
             // don't store extra unnecessary session state
-            session.removeAttribute(
-                CAS_FILTER_GATEWAYED);
+            session.removeAttribute(CAS_FILTER_GATEWAYED);
         }
         if (log.isTraceEnabled()){
 					log.trace("validated ticket to get authenticated receipt [" + receipt + "], now passing request along filter chain.");
@@ -494,6 +508,7 @@ public class CASFilter implements Filter {
     }
 
     /**
+     * CCCI 
      * Is this receipt acceptable as evidence of authentication by
      * credentials that would have been acceptable to this path?
      * Current implementation checks whether from renew and whether proxy

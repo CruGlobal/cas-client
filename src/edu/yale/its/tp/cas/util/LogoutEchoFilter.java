@@ -47,11 +47,6 @@ public class LogoutEchoFilter implements Filter {
     public static final String INIT_PARAM_ECHO_TARGETS = "edu.yale.its.tp.cas.logout.echo.targets";
     
     /**
-     * The set of PGTIOUs received so far.
-     */
-    private Set receivedPgtIous = Collections.synchronizedSet(new HashSet());
-    
-    /**
      * The set of URLs of ProxyTicketReceptor instances to which this filter should echo.
      */
     private Set echoTargets = new HashSet();
@@ -149,8 +144,6 @@ public class LogoutEchoFilter implements Filter {
         sb.append(this.getClass().getName());
         sb.append(" echoTargets=");
         sb.append(this.echoTargets);
-        sb.append(" receivedPgtIous=");
-        sb.append(this.receivedPgtIous);
         return sb.toString();
     }
 

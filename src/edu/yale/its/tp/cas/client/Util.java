@@ -53,64 +53,80 @@ public class Util {
    */
   public static String getService(HttpServletRequest request, String server)
       throws ServletException {
-    if (log.isTraceEnabled()){
-    	log.trace("entering getService(" + request + ", " + server + ")");
-    }
-      	
-    // ensure we have a server name
-    // CCCI commented this out
-//    if (server == null) {
-//    	log.error("getService() argument \"server\" was illegally null.");
-//			throw new IllegalArgumentException("name of server is required");
-//    }
-
-
-    // now, construct our best guess at the string
-    StringBuffer sb = new StringBuffer();
-    // CCCI TODO - add "secure through proxy" ability
-    if (request.isSecure())
-      sb.append("https://");
-    else
-      sb.append("http://");
-    // CCCI - added this section
-    if(server==null)
-    {
-        server = request.getServerName();
-        int port = request.getServerPort();
-        if(port != 80 && port != 443)
-        {
-            server+=':';
-            server+=port;
-        }
-    }
-    sb.append(server);
-    sb.append(request.getRequestURI());
-
-    if (request.getQueryString() != null) {
-      // first, see whether we've got a 'ticket' at all
-      int ticketLoc = request.getQueryString().indexOf("ticket=");
-
-      // if ticketLoc == 0, then it's the only parameter and we ignore
-      // the whole query string
-
-      // if no ticket is present, we use the query string wholesale
-      if (ticketLoc == -1)
-        sb.append("?" + request.getQueryString());
-      else if (ticketLoc > 0) {
-	ticketLoc = request.getQueryString().indexOf("&ticket=");
-	if (ticketLoc == -1) {
-	  // there was a 'ticket=' unrelated to a parameter named 'ticket'
-	  sb.append("?" + request.getQueryString());
-	} else if (ticketLoc > 0) {
-	  // otherwise, we use the query string up to "&ticket="
-          sb.append("?" + request.getQueryString().substring(0, ticketLoc));
-	}
-      }
-    }
-    String encodedService = URLEncoder.encode(sb.toString());
-    if (log.isTraceEnabled()){
-    	log.trace("returning from getService() with encoded service [" + encodedService + "]");	
-    }
-    return encodedService;
+    return getService(request, server, true);
   }
+  
+  
+  public static String getService(HttpServletRequest request, String server, boolean encode) throws ServletException
+    {
+        if (log.isTraceEnabled())
+        {
+            log.trace("entering getService(" + request + ", " + server + ")");
+        }
+
+        // ensure we have a server name
+        // CCCI commented this out
+        // if (server == null) {
+        // log.error("getService() argument \"server\" was illegally null.");
+        // throw new IllegalArgumentException("name of server is required");
+        // }
+
+        // now, construct our best guess at the string
+        StringBuffer sb = new StringBuffer();
+        // CCCI TODO - add "secure through proxy" ability
+        if (request.isSecure())
+            sb.append("https://");
+        else
+            sb.append("http://");
+        // CCCI - added this section
+        if (server == null)
+        {
+            server = request.getServerName();
+            int port = request.getServerPort();
+            if (port != 80 && port != 443)
+            {
+                server += ':';
+                server += port;
+            }
+        }
+        sb.append(server);
+        sb.append(request.getRequestURI());
+
+        if (request.getQueryString() != null)
+        {
+            // first, see whether we've got a 'ticket' at all
+            int ticketLoc = request.getQueryString().indexOf("ticket=");
+
+            // if ticketLoc == 0, then it's the only parameter and we ignore
+            // the whole query string
+
+            // if no ticket is present, we use the query string wholesale
+            if (ticketLoc == -1)
+                sb.append("?" + request.getQueryString());
+            else if (ticketLoc > 0)
+            {
+                ticketLoc = request.getQueryString().indexOf("&ticket=");
+                if (ticketLoc == -1)
+                {
+                    // there was a 'ticket=' unrelated to a parameter named
+                    // 'ticket'
+                    sb.append("?" + request.getQueryString());
+                }
+                else if (ticketLoc > 0)
+                {
+                    // otherwise, we use the query string up to "&ticket="
+                    sb.append("?" + request.getQueryString().substring(0, ticketLoc));
+                }
+            }
+        }
+        
+        if(!encode) return sb.toString();
+        
+        String encodedService = URLEncoder.encode(sb.toString());
+        if (log.isTraceEnabled())
+        {
+            log.trace("returning from getService() with encoded service [" + encodedService + "]");
+        }
+        return encodedService;
+    }
 }

@@ -32,7 +32,7 @@
 	</target>
 
 	<target name="jar" depends="compile" description="Jar the classes.">
-		<jar jarfile="dist/casclient.jar" basedir="build" />
+		<jar jarfile="dist/casclient-ccci-2.1.0.jar" basedir="build" />
 	</target>
 
 	<target name="sourcejar" depends="prepare" description="Jar up the source code.">
