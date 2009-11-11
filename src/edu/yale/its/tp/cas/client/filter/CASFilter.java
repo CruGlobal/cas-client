@@ -10,6 +10,7 @@ import java.util.*;
 
 import javax.servlet.*;
 import javax.servlet.http.*;
+
 import edu.yale.its.tp.cas.client.*;
 
 import org.apache.commons.logging.Log;
@@ -434,7 +435,22 @@ public class CASFilter implements Filter {
                 }
             }
         }
-
+        
+        // CCCI
+        // if our attribute's already present and valid, pass through the filter chain
+        if (ticket==null && receipt != null && isReceiptAcceptable(receipt)) {
+                log.trace("CAS_FILTER_RECEIPT attribute was present and acceptable - passing  request through filter..");
+            if(session.getAttribute(CASFilter.CAS_FILTER_RECEIPT_IS_FRESH_BEFORE_REDIRECT)!=null)
+            {
+                session.removeAttribute(CASFilter.CAS_FILTER_RECEIPT_IS_FRESH_BEFORE_REDIRECT);
+            }
+            else
+            {
+                session.removeAttribute(CASFilter.CAS_FILTER_RECEIPT_IS_FRESH);
+            }
+            fc.doFilter(request, response);
+            return;
+        }
 
         try {
             receipt = getAuthenticatedUser((HttpServletRequest) request);
@@ -462,8 +478,20 @@ public class CASFilter implements Filter {
         }
         
         // continue processing the request
-        fc.doFilter(request, response);
-        log.trace("returning from doFilter()");
+        
+        // CCCI
+        //fc.doFilter(request, response);
+        //log.trace("returning from doFilter()");
+
+        String redirectUrl = Util.getService((HttpServletRequest)request, casServerName, false);
+        // remove "ticket" parameter - mid-string
+        redirectUrl = redirectUrl.replaceAll("ticket=[^&]*&","");
+        // remove "ticket" parameter - end-string
+        redirectUrl = redirectUrl.replaceAll("ticket=[^&]*$","");
+        redirectUrl = redirectUrl.replaceAll("&$","");
+        redirectUrl = redirectUrl.replaceAll("\\?$","");
+        System.out.println("AUTH: Redirecting to self to clean ticket:" + redirectUrl);
+        ((HttpServletResponse) response).sendRedirect(redirectUrl);    
     }
 
     /**

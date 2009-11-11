@@ -374,6 +374,8 @@ public class CASValidateFilter implements Filter {
         }
 
         // continue processing the request
+        
+        // CCCI
 //        fc.doFilter(request, response);
 //        log.trace("returning from doFilter()");
         

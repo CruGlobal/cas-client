@@ -32,10 +32,17 @@
 
 package edu.yale.its.tp.cas.client.filter;
 
-import javax.servlet.http.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import edu.yale.its.tp.cas.client.CASReceipt;
 
 /**
  * <p>Wraps the <code>HttpServletRequest</code> object, replacing
@@ -53,6 +60,62 @@ public class CASFilterRequestWrapper extends HttpServletRequestWrapper {
     	if (log.isTraceEnabled()){
     		log.trace("wrapping an HttpServletRequest in a CASFilterRequestWrapper.");
     	}
+    }
+    
+    @Override
+    public String getHeader(String name)
+    {
+        if(name.equals(CASFilter.CAS_FILTER_USER))
+            return getRemoteUser();
+        
+        if(name.startsWith("CAS_"))
+        {
+            CASReceipt receipt = (CASReceipt)getSession().getAttribute(CASFilter.CAS_FILTER_RECEIPT);
+            return (String)receipt.getAttributes().get(name.substring(4));
+        }
+        
+        return super.getHeader(name);
+    }
+    
+    @Override
+    public Enumeration getHeaderNames()
+    {
+        ArrayList a = new ArrayList();
+        Enumeration e = super.getHeaderNames();
+        while(e.hasMoreElements())
+        {
+            a.add(e.nextElement());
+        }
+        a.add(CASFilter.CAS_FILTER_USER);
+        
+        CASReceipt receipt = (CASReceipt)getSession().getAttribute(CASFilter.CAS_FILTER_RECEIPT);
+        for(Object name : receipt.getAttributes().keySet())
+        {
+            a.add("CAS_"+name);
+        }
+            
+        return Collections.enumeration(a);
+    }
+    
+    @Override
+    public Enumeration getHeaders(String name)
+    {
+        if(name.equals(CASFilter.CAS_FILTER_USER))
+        {
+            ArrayList a = new ArrayList();
+            a.add(getRemoteUser());
+            return Collections.enumeration(a);
+        }
+        
+        if(name.startsWith("CAS_"))
+        {
+            CASReceipt receipt = (CASReceipt)getSession().getAttribute(CASFilter.CAS_FILTER_RECEIPT);
+            ArrayList a = new ArrayList();
+            a.add(receipt.getAttributes().get(name.substring(4)));
+            return Collections.enumeration(a);
+        }
+        
+        return super.getHeaders(name);
     }
 
     /**
