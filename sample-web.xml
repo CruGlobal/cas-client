@@ -1,0 +1,64 @@
+  <filter>
+    <filter-name>CAS Filter</filter-name>
+    <filter-class>edu.yale.its.tp.cas.client.filter.CASFilter</filter-class>
+    <!-- use CASValidateFilter instead of CASFilter if you only want to check for the presence of a "ticket" without redirecting
+         note that this is different from gateway mode -->
+
+    <init-param>
+      <param-name>edu.yale.its.tp.cas.client.filter.loginUrl</param-name>
+      <param-value>https://signin.mygcx.org/cas/login</param-value>
+    </init-param>
+    <init-param>
+      <param-name>edu.yale.its.tp.cas.client.filter.validateUrl</param-name>
+      <param-value>https://signin.mygcx.org/cas/serviceValidate</param-value>
+    </init-param>
+
+
+    <init-param>
+      <param-name>edu.yale.its.tp.cas.client.filter.wrapRequest</param-name>
+      <param-value>true</param-value>
+    </init-param>
+
+    <init-param>
+      <param-name>edu.yale.its.tp.cas.client.filter.logoutCallbackUrl</param-name>
+      <param-value>http://my-server/appliation/logout</param-value>
+    </init-param>
+    
+    <!-- 
+    <init-param>
+      <param-name>edu.yale.its.tp.cas.client.filter.renew</param-name>
+      <param-value>true</param-value>
+    </init-param>
+    <init-param>
+      <param-name>edu.yale.its.tp.cas.client.filter.gateway</param-name>
+      <param-value>true</param-value>
+    </init-param>
+
+
+    <init-param>
+      <param-name>edu.yale.its.tp.cas.client.filter.authorizedProxy</param-name>
+      <param-value>true</param-value>
+    </init-param>
+    <init-param>
+      <param-name>edu.yale.its.tp.cas.client.filter.proxyCallbackUrl</param-name>
+      <param-value>true</param-value>
+    </init-param>
+
+
+    <init-param>
+      <param-name>edu.yale.its.tp.cas.client.filter.serviceUrl</param-name>
+      <param-value>http://my-server.com/appliation/frontpage.html</param-value>
+    </init-param>
+    <init-param>
+      <param-name>edu.yale.its.tp.cas.client.filter.serverName</param-name>
+      <param-value>my-server.com</param-value>
+    </init-param>
+    
+     -->
+  </filter>
+  
+  
+  <filter-mapping>
+    <filter-name>CAS Filter</filter-name>
+    <url-pattern>/*</url-pattern>
+  </filter-mapping>
