@@ -54,12 +54,16 @@ import edu.yale.its.tp.cas.client.CASReceipt;
 public class CASFilterRequestWrapper extends HttpServletRequestWrapper {
 
 	private static Log log = LogFactory.getLog(CASFilterRequestWrapper.class);
+	
+	// CCCI
+	private String remoteUserAttrib;
 
-    public CASFilterRequestWrapper(HttpServletRequest request) {
+    public CASFilterRequestWrapper(HttpServletRequest request, String remoteUserAttrib) {
 			super(request);
     	if (log.isTraceEnabled()){
     		log.trace("wrapping an HttpServletRequest in a CASFilterRequestWrapper.");
     	}
+    	this.remoteUserAttrib = remoteUserAttrib;
     }
     
     @Override
@@ -124,7 +128,16 @@ public class CASFilterRequestWrapper extends HttpServletRequestWrapper {
      * <code>CASFilter.CAS_FILTER_USER</code>.</p>
      */
     public String getRemoteUser() {
-    	String user = (String)getSession().getAttribute(CASFilter.CAS_FILTER_USER);
+    	String user;
+    	if(remoteUserAttrib!=null && remoteUserAttrib.trim().length()>0)
+    	{
+    	    CASReceipt receipt = (CASReceipt)getSession().getAttribute(CASFilter.CAS_FILTER_RECEIPT);
+    	    user = (String)receipt.getAttributes().get(remoteUserAttrib);
+    	}
+    	else
+    	{
+    	    user = (String)getSession().getAttribute(CASFilter.CAS_FILTER_USER);
+    	}
     	if (log.isTraceEnabled()){
     		log.trace("getRemoteUser() returning [" + user + "]");
     	}

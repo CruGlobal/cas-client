@@ -192,6 +192,9 @@ public class CASValidateFilter implements Filter {
      */
     private boolean wrapRequest;
     
+    /** CCCI */
+    private String remoteUserAttrib = null;
+    
     /**
      * CCCI
      * 
@@ -223,6 +226,9 @@ public class CASValidateFilter implements Filter {
         wrapRequest = Boolean.valueOf(
                 config.getInitParameter(WRAP_REQUESTS_INIT_PARAM))
                 .booleanValue();
+        remoteUserAttrib =
+            config.getInitParameter(
+                CASFilter.REMOTE_USER_ATTRIB_INIT_PARAM);
 
         if (casServerName != null && casServiceUrl != null) {
             throw new ServletException(
@@ -300,7 +306,7 @@ public class CASValidateFilter implements Filter {
         // Wrap the request if desired
         if (wrapRequest) {
             log.trace("Wrapping request with CASFilterRequestWrapper.");
-            request = new CASFilterRequestWrapper((HttpServletRequest) request);
+            request = new CASFilterRequestWrapper((HttpServletRequest) request, remoteUserAttrib);
         }
 
         HttpSession session = ((HttpServletRequest) request).getSession();
