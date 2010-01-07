@@ -4,17 +4,31 @@
 
 package edu.yale.its.tp.cas.client.filter;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import edu.yale.its.tp.cas.client.*;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import edu.yale.its.tp.cas.client.CASAuthenticationException;
+import edu.yale.its.tp.cas.client.CASReceipt;
+import edu.yale.its.tp.cas.client.ProxyTicketValidator;
+import edu.yale.its.tp.cas.client.Util;
 
 /**
  * <p>Protects web-accessible resources with CAS.</p>
@@ -149,6 +163,19 @@ public class CASFilter implements Filter {
      */
     public final static String GATEWAY_INIT_PARAM = "edu.yale.its.tp.cas.client.filter.gateway";
     
+    /**
+     * CCCI
+     * The name of the filter initialization parameter that determines which user attribute is returned
+     * from Request.getRemoteUser() by the wrapped request.  Either leave unset or set it to an empty string
+     * in order to send the username ("netId" in CAS terminology).
+     */
+    public final static String REMOTE_USER_ATTRIB_INIT_PARAM = "edu.yale.its.tp.cas.client.filter.remoteUserAttrib";
+    
+    /**
+     * CCCI
+     */
+    public final static String URL_PATTERN_EXCLUDE_INIT_PARAM = "url-pattern-exclude";
+    
     // Session attributes used by this filter
 
     /** <p>Session attribute in which the username is stored.</p> */
@@ -191,7 +218,7 @@ public class CASFilter implements Filter {
     private String casServerName;
     /** Secure URL whereto this filter should ask CAS to send Proxy Granting Tickets. */
     private String casProxyCallbackUrl;
-    /** Secure URL whereto this filter should ask CAS to send logout commands. */
+    /** CCCI Secure URL whereto this filter should ask CAS to send logout commands. */
     private String casLogoutCallbackUrl;
     
     /** True if renew parameter should be set on login and validate */
@@ -202,6 +229,12 @@ public class CASFilter implements Filter {
     
     /** True if this filter should set gateway=true on login redirect */
     private boolean casGateway = false;
+    
+    /** CCCI */
+    private String remoteUserAttrib = null;
+    
+    /** CCCI */
+    private List<Pattern> urlPatternExclude = new ArrayList<Pattern>();
     
     /**
      * CCCI 
@@ -222,6 +255,7 @@ public class CASFilter implements Filter {
     // Initialization 
 
     public void init(FilterConfig config) throws ServletException {
+        System.out.println("Initializing CASFilter");
         casLogin =
             config.getInitParameter(
                 LOGIN_INIT_PARAM);
@@ -257,7 +291,10 @@ public class CASFilter implements Filter {
                     config.getInitParameter(
                         GATEWAY_INIT_PARAM))
                 .booleanValue();
-
+        remoteUserAttrib =
+            config.getInitParameter(
+                REMOTE_USER_ATTRIB_INIT_PARAM);
+        
         if (casGateway && Boolean.valueOf(casRenew).booleanValue()) {
             throw new ServletException("gateway and renew cannot both be true in filter configuration");
         }
@@ -297,6 +334,16 @@ public class CASFilter implements Filter {
             }
         }
         
+        // CCCI
+        String urlPatternExclude = config.getInitParameter(URL_PATTERN_EXCLUDE_INIT_PARAM);
+        StringTokenizer excludePatterns = new StringTokenizer(urlPatternExclude);
+//        System.out.println("CAS-urlPatternExclude: "+urlPatternExclude);
+        while (excludePatterns.hasMoreTokens()) {
+            String anExcludedPattern = excludePatterns.nextToken();
+//            System.out.println("CAS-excluding: "+anExcludedPattern);
+            this.urlPatternExclude.add(Pattern.compile(anExcludedPattern));
+        }
+        
         if (log.isDebugEnabled()){
 					log.debug(("CASFilter initialized as: [" + toString() + "]"));
         }
@@ -323,6 +370,26 @@ public class CASFilter implements Filter {
             }
             
 
+        if(urlPatternExclude!=null && urlPatternExclude.size()>0)
+        {
+//            System.out.println("CAS-checking for exclusion");
+            for(Pattern p : urlPatternExclude)
+            {
+                Matcher m = p.matcher(((HttpServletRequest) request).getRequestURI());
+//                System.out.println("CAS-pattern:"+p.toString());
+                if(m.matches())
+                {
+//                    System.out.println("URL "+((HttpServletRequest) request).getRequestURI()+" is excluded by pattern: "+p.toString());
+                    log.trace("URL "+((HttpServletRequest) request).getRequestURI()+" is excluded by pattern: "+p.toString());
+                    fc.doFilter(request, response);
+                    return;
+                }
+//                else
+//                    System.out.println("URL "+((HttpServletRequest) request).getRequestURI()+" is NOT excluded by pattern: "+p.toString());
+                    
+            }
+        }
+                
         // Is this a request for the proxy callback listener?  If so, pass
         // it through
         if (casProxyCallbackUrl != null
@@ -348,7 +415,7 @@ public class CASFilter implements Filter {
         // Wrap the request if desired
         if (wrapRequest) {
         		log.trace("Wrapping request with CASFilterRequestWrapper.");
-            request = new CASFilterRequestWrapper((HttpServletRequest) request);
+            request = new CASFilterRequestWrapper((HttpServletRequest) request, remoteUserAttrib);
         }
 
         HttpSession session = ((HttpServletRequest) request).getSession();

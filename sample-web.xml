@@ -3,6 +3,11 @@
     <filter-class>edu.yale.its.tp.cas.client.filter.CASFilter</filter-class>
     <!-- use CASValidateFilter instead of CASFilter if you only want to check for the presence of a "ticket" without redirecting
          note that this is different from gateway mode -->
+         
+    <init-param>
+    	<param-name>url-pattern-exclude</param-name>
+    	<param-value>/services.*</param-value>
+  	</init-param>
 
     <init-param>
       <param-name>edu.yale.its.tp.cas.client.filter.loginUrl</param-name>
@@ -27,21 +32,21 @@
     <!-- 
     <init-param>
       <param-name>edu.yale.its.tp.cas.client.filter.renew</param-name>
-      <param-value>true</param-value>
+      <param-value>false</param-value>
     </init-param>
     <init-param>
       <param-name>edu.yale.its.tp.cas.client.filter.gateway</param-name>
-      <param-value>true</param-value>
+      <param-value>false</param-value>
     </init-param>
 
 
     <init-param>
       <param-name>edu.yale.its.tp.cas.client.filter.authorizedProxy</param-name>
-      <param-value>true</param-value>
+      <param-value>https://www.ccci.org</param-value>
     </init-param>
     <init-param>
       <param-name>edu.yale.its.tp.cas.client.filter.proxyCallbackUrl</param-name>
-      <param-value>true</param-value>
+      <param-value>http://my-server/appliation/proxycallback</param-value>
     </init-param>
 
 
