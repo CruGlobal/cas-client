@@ -11,7 +11,11 @@ public class TimeoutThread extends Thread
     public Exception e;
     public Object retVal;
     Object[] params;
-    public synchronized void cleanup() {}
+
+    public synchronized void cleanup()
+    {
+    }
+
     public synchronized Object startWithTimeout(Object[] params, int timeout) throws Exception
     {
         this.params = params;
@@ -21,10 +25,13 @@ public class TimeoutThread extends Thread
             wait(timeout);
             cleanup();
         }
-        catch (InterruptedException e) { /* do nothing */ }
-        if(e!=null) throw new Exception(e);
+        catch (InterruptedException e)
+        { /* do nothing */
+        }
+        if (e != null) throw new Exception(e);
         return retVal;
     }
+
     public void run()
     {
         try
@@ -36,5 +43,9 @@ public class TimeoutThread extends Thread
             this.e = e;
         }
     }
-    public synchronized Object run(Object[] params) throws Exception { return null; }
+
+    public synchronized Object run(Object[] params) throws Exception
+    {
+        return null;
+    }
 }

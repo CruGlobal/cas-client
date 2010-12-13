@@ -45,102 +45,112 @@ import org.apache.commons.logging.LogFactory;
 import edu.yale.its.tp.cas.client.CASReceipt;
 
 /**
- * <p>Wraps the <code>HttpServletRequest</code> object, replacing
- * <code>getRemoteUser()</code> with a version that returns the current
- * CAS logged-in user.</p>
- *
+ * <p>
+ * Wraps the <code>HttpServletRequest</code> object, replacing
+ * <code>getRemoteUser()</code> with a version that returns the current CAS
+ * logged-in user.
+ * </p>
+ * 
  * @author Drew Mazurek
  */
-public class CASFilterRequestWrapper extends HttpServletRequestWrapper {
+public class CASFilterRequestWrapper extends HttpServletRequestWrapper
+{
 
-	private static Log log = LogFactory.getLog(CASFilterRequestWrapper.class);
-	
-	// CCCI
-	private String remoteUserAttrib;
+    private static Log log = LogFactory.getLog(CASFilterRequestWrapper.class);
 
-    public CASFilterRequestWrapper(HttpServletRequest request, String remoteUserAttrib) {
-			super(request);
-    	if (log.isTraceEnabled()){
-    		log.trace("wrapping an HttpServletRequest in a CASFilterRequestWrapper.");
-    	}
-    	this.remoteUserAttrib = remoteUserAttrib;
+    // CCCI
+    private String remoteUserAttrib;
+
+    public CASFilterRequestWrapper(HttpServletRequest request, String remoteUserAttrib)
+    {
+        super(request);
+        if (log.isTraceEnabled())
+        {
+            log.trace("wrapping an HttpServletRequest in a CASFilterRequestWrapper.");
+        }
+        this.remoteUserAttrib = remoteUserAttrib;
     }
-    
+
     @Override
     public String getHeader(String name)
     {
-        if(name.equals(CASFilter.CAS_FILTER_USER))
-            return getRemoteUser();
-        
-        if(name.startsWith("CAS_"))
+        if (name.equals(CASFilter.CAS_FILTER_USER)) return getRemoteUser();
+
+        if (name.startsWith("CAS_"))
         {
-            CASReceipt receipt = (CASReceipt)getSession().getAttribute(CASFilter.CAS_FILTER_RECEIPT);
-            return (String)receipt.getAttributes().get(name.substring(4));
+            CASReceipt receipt = (CASReceipt) getSession().getAttribute(CASFilter.CAS_FILTER_RECEIPT);
+            return (String) receipt.getAttributes().get(name.substring(4));
         }
-        
+
         return super.getHeader(name);
     }
-    
+
     @Override
     public Enumeration getHeaderNames()
     {
         ArrayList a = new ArrayList();
         Enumeration e = super.getHeaderNames();
-        while(e.hasMoreElements())
+        while (e.hasMoreElements())
         {
             a.add(e.nextElement());
         }
         a.add(CASFilter.CAS_FILTER_USER);
-        
-        CASReceipt receipt = (CASReceipt)getSession().getAttribute(CASFilter.CAS_FILTER_RECEIPT);
-        for(Object name : receipt.getAttributes().keySet())
+
+        CASReceipt receipt = (CASReceipt) getSession().getAttribute(CASFilter.CAS_FILTER_RECEIPT);
+        for (Object name : receipt.getAttributes().keySet())
         {
-            a.add("CAS_"+name);
+            a.add("CAS_" + name);
         }
-            
+
         return Collections.enumeration(a);
     }
-    
+
     @Override
     public Enumeration getHeaders(String name)
     {
-        if(name.equals(CASFilter.CAS_FILTER_USER))
+        if (name.equals(CASFilter.CAS_FILTER_USER))
         {
             ArrayList a = new ArrayList();
             a.add(getRemoteUser());
             return Collections.enumeration(a);
         }
-        
-        if(name.startsWith("CAS_"))
+
+        if (name.startsWith("CAS_"))
         {
-            CASReceipt receipt = (CASReceipt)getSession().getAttribute(CASFilter.CAS_FILTER_RECEIPT);
+            CASReceipt receipt = (CASReceipt) getSession().getAttribute(CASFilter.CAS_FILTER_RECEIPT);
             ArrayList a = new ArrayList();
             a.add(receipt.getAttributes().get(name.substring(4)));
             return Collections.enumeration(a);
         }
-        
+
         return super.getHeaders(name);
     }
 
     /**
-     * <p>Returns the currently logged in CAS user.</p>
-     * <p>Specifically, this returns the value of the session attribute,
-     * <code>CASFilter.CAS_FILTER_USER</code>.</p>
+     * <p>
+     * Returns the currently logged in CAS user.
+     * </p>
+     * <p>
+     * Specifically, this returns the value of the session attribute,
+     * <code>CASFilter.CAS_FILTER_USER</code>.
+     * </p>
      */
-    public String getRemoteUser() {
-    	String user;
-    	if(remoteUserAttrib!=null && remoteUserAttrib.trim().length()>0)
-    	{
-    	    CASReceipt receipt = (CASReceipt)getSession().getAttribute(CASFilter.CAS_FILTER_RECEIPT);
-    	    user = (String)receipt.getAttributes().get(remoteUserAttrib);
-    	}
-    	else
-    	{
-    	    user = (String)getSession().getAttribute(CASFilter.CAS_FILTER_USER);
-    	}
-    	if (log.isTraceEnabled()){
-    		log.trace("getRemoteUser() returning [" + user + "]");
-    	}
-    	return user;
+    public String getRemoteUser()
+    {
+        String user;
+        if (remoteUserAttrib != null && remoteUserAttrib.trim().length() > 0)
+        {
+            CASReceipt receipt = (CASReceipt) getSession().getAttribute(CASFilter.CAS_FILTER_RECEIPT);
+            user = (String) receipt.getAttributes().get(remoteUserAttrib);
+        }
+        else
+        {
+            user = (String) getSession().getAttribute(CASFilter.CAS_FILTER_USER);
+        }
+        if (log.isTraceEnabled())
+        {
+            log.trace("getRemoteUser() returning [" + user + "]");
+        }
+        return user;
     }
 }

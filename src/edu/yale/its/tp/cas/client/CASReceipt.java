@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
  * @author andrew.petro@yale.edu
  * @version $Revision: 1.2 $ $Date: 2004/07/14 22:58:07 $
  */
-public class CASReceipt implements Serializable 
+public class CASReceipt implements Serializable
 {
     private static final long serialVersionUID = 1L;
 
@@ -38,37 +38,39 @@ public class CASReceipt implements Serializable
      * the ProxyTicketValidator has not already been validated, this method will
      * validate the ptv.
      * 
-     * @param ptv -
-     *            a ProxyTicketValidator from which to harvest the receipt.
+     * @param ptv
+     *            - a ProxyTicketValidator from which to harvest the receipt.
      * @return CASReceipt encapsulating fruits of authentication.
-     * @throws CASAuthenticationException -
-     *             if ticket validation fails for any reason.
+     * @throws CASAuthenticationException
+     *             - if ticket validation fails for any reason.
      */
-    public static CASReceipt getReceipt(ProxyTicketValidator ptv)
-            throws CASAuthenticationException {
+    public static CASReceipt getReceipt(ProxyTicketValidator ptv) throws CASAuthenticationException
+    {
 
-        if (log.isTraceEnabled()) {
-            log
-                    .trace("entering getReceipt(ProxyTicketValidator=[" + ptv
-                            + "])");
+        if (log.isTraceEnabled())
+        {
+            log.trace("entering getReceipt(ProxyTicketValidator=[" + ptv + "])");
         }
 
-        if (!ptv.isAuthenticationSuccesful()) {
-            try {
+        if (!ptv.isAuthenticationSuccesful())
+        {
+            try
+            {
                 ptv.validate();
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 CASAuthenticationException casException = new CASAuthenticationException(
-                        "Unable to validate ProxyTicketValidator [" + ptv + "]",
-                        e);
+                    "Unable to validate ProxyTicketValidator [" + ptv + "]", e);
                 log.error(casException);
                 throw casException;
             }
         }
 
-        if (!ptv.isAuthenticationSuccesful()) {
+        if (!ptv.isAuthenticationSuccesful())
+        {
             log.error("validation of [" + ptv + "] was not successful.");
-            throw new CASAuthenticationException(
-                    "Unable to validate ProxyTicketValidator [" + ptv + "]");
+            throw new CASAuthenticationException("Unable to validate ProxyTicketValidator [" + ptv + "]");
         }
 
         CASReceipt receipt = new CASReceipt();
@@ -83,16 +85,12 @@ public class CASReceipt implements Serializable
         // CCCI
         receipt.serviceTicket = ptv.getSt();
 
-        if (!receipt.validate()) {
-            throw new CASAuthenticationException(
-                    "Validation of ["
-                            + ptv
-                            + "] did not result in an internally consistent CASReceipt.");
-        }
+        if (!receipt.validate()) { throw new CASAuthenticationException("Validation of [" + ptv
+                + "] did not result in an internally consistent CASReceipt."); }
 
-        if (log.isTraceEnabled()) {
-            log.trace("returning from getReceipt() with return value ["
-                    + receipt + "]");
+        if (log.isTraceEnabled())
+        {
+            log.trace("returning from getReceipt() with return value [" + receipt + "]");
         }
         return receipt;
     }
@@ -120,7 +118,7 @@ public class CASReceipt implements Serializable
 
     /** The authenticated username. */
     private String userName;
-    
+
     // CCCI
     /** The service ticket that issued this receipt */
     private String serviceTicket;
@@ -129,7 +127,8 @@ public class CASReceipt implements Serializable
      * Do-nothing constructor. You probably want to call
      * getReceipt(ProxyTicketValidator);
      */
-    public CASReceipt() {
+    public CASReceipt()
+    {
         // does nothing
     }
 
@@ -139,7 +138,8 @@ public class CASReceipt implements Serializable
      * 
      * @return the URL of the CAS ticket validation service.
      */
-    public String getCasValidateUrl() {
+    public String getCasValidateUrl()
+    {
         return this.casValidateUrl;
     }
 
@@ -149,7 +149,8 @@ public class CASReceipt implements Serializable
      * 
      * @return the PGTIOU, or NULL.
      */
-    public String getPgtIou() {
+    public String getPgtIou()
+    {
         return this.pgtIou;
     }
 
@@ -158,7 +159,8 @@ public class CASReceipt implements Serializable
      * 
      * @return the Proxy Callback URL, or NULL if none was set.
      */
-    public String getProxyCallbackUrl() {
+    public String getProxyCallbackUrl()
+    {
         return this.proxyCallbackUrl;
     }
 
@@ -169,7 +171,8 @@ public class CASReceipt implements Serializable
      * 
      * @return an unmodifiable view on the proxy list.
      */
-    public List getProxyList() {
+    public List getProxyList()
+    {
         return Collections.unmodifiableList(this.proxyList);
     }
 
@@ -178,7 +181,8 @@ public class CASReceipt implements Serializable
      * 
      * @return the authenticated username.
      */
-    public String getUserName() {
+    public String getUserName()
+    {
         return this.userName;
     }
 
@@ -192,7 +196,8 @@ public class CASReceipt implements Serializable
      * @return true if authentication was by primary credentials, false
      *         otherwise.
      */
-    public boolean isPrimaryAuthentication() {
+    public boolean isPrimaryAuthentication()
+    {
         return this.primaryAuthentication;
     }
 
@@ -202,7 +207,8 @@ public class CASReceipt implements Serializable
      * @return true if authentication was proxied by another service, false
      *         otherwise.
      */
-    public boolean isProxied() {
+    public boolean isProxied()
+    {
         return (!this.proxyList.isEmpty());
     }
 
@@ -213,36 +219,38 @@ public class CASReceipt implements Serializable
      * @return the URL of the service proxying authentication to this
      *         application, or NULL.
      */
-    public String getProxyingService() {
-        if (proxyList.isEmpty()) {
-            return null;
-        }
+    public String getProxyingService()
+    {
+        if (proxyList.isEmpty()) { return null; }
         return (String) proxyList.get(0);
     }
 
     /**
      * CCCI
+     * 
      * @return Returns the attributes.
      */
     public Map getAttributes()
     {
         return attributes;
     }
-    
+
     /**
      * CCCI
+     * 
      * @return Returns the serviceTicket.
      */
     public String getServiceTicket()
     {
         return serviceTicket;
     }
-    
+
     /**
      * @param casValidateUrl
      *            The casValidateUrl to set.
      */
-    public void setCasValidateUrl(String casValidateUrl) {
+    public void setCasValidateUrl(String casValidateUrl)
+    {
         this.casValidateUrl = casValidateUrl;
     }
 
@@ -250,7 +258,8 @@ public class CASReceipt implements Serializable
      * @param pgtIou
      *            The pgtIou to set.
      */
-    public void setPgtIou(String pgtIou) {
+    public void setPgtIou(String pgtIou)
+    {
         this.pgtIou = pgtIou;
     }
 
@@ -258,7 +267,8 @@ public class CASReceipt implements Serializable
      * @param primaryAuthentication
      *            The primaryAuthentication to set.
      */
-    public void setPrimaryAuthentication(boolean primaryAuthentication) {
+    public void setPrimaryAuthentication(boolean primaryAuthentication)
+    {
         this.primaryAuthentication = primaryAuthentication;
     }
 
@@ -266,7 +276,8 @@ public class CASReceipt implements Serializable
      * @param proxyCallbackUrl
      *            The proxyCallbackUrl to set.
      */
-    public void setProxyCallbackUrl(String proxyCallbackUrl) {
+    public void setProxyCallbackUrl(String proxyCallbackUrl)
+    {
         this.proxyCallbackUrl = proxyCallbackUrl;
     }
 
@@ -274,7 +285,8 @@ public class CASReceipt implements Serializable
      * @param proxyList
      *            The proxyList to set.
      */
-    public void setProxyList(List proxyList) {
+    public void setProxyList(List proxyList)
+    {
         this.proxyList = proxyList;
     }
 
@@ -282,11 +294,13 @@ public class CASReceipt implements Serializable
      * @param userName
      *            The userName to set.
      */
-    public void setUserName(String userName) {
+    public void setUserName(String userName)
+    {
         this.userName = userName;
     }
 
-    public String toString() {
+    public String toString()
+    {
         StringBuffer sb = new StringBuffer();
         sb.append("[");
         sb.append(CASReceipt.class.getName());
@@ -319,42 +333,40 @@ public class CASReceipt implements Serializable
      * 
      * @return true if internally consistent, false otherwise.
      */
-    private boolean validate() {
+    private boolean validate()
+    {
         boolean valid = true;
-        if (this.userName == null) {
-            log
-                    .error("Receipt was invalid because userName was null. Receipt:["
-                            + this + "]");
+        if (this.userName == null)
+        {
+            log.error("Receipt was invalid because userName was null. Receipt:[" + this + "]");
             valid = false;
         }
-        if (this.casValidateUrl == null) {
-            log
-                    .error("Receipt was invalid because casValidateUrl was null.  Receipt:["
-                            + this + "]");
+        if (this.casValidateUrl == null)
+        {
+            log.error("Receipt was invalid because casValidateUrl was null.  Receipt:[" + this + "]");
             valid = false;
         }
-        if (this.proxyList == null) {
-            log.error("receipt was invalid because "
-                    + "proxyList was null.  Receipt:[" + this + "]");
+        if (this.proxyList == null)
+        {
+            log.error("receipt was invalid because " + "proxyList was null.  Receipt:[" + this + "]");
             valid = false;
         }
 
         // Commented out because this is a recoverable error.
-//        if ((this.pgtIou == null) != (this.proxyCallbackUrl == null)) {
-//            log
-//                    .error("If we have a PGTIOU, there must have been a URL to which the PGT itself was sent.  "
-//                            + "However, here, one but not the other was null.  PGTIOU=["
-//                            + pgtIou
-//                            + "] and proxyCallbackUrl=["
-//                            + this.proxyCallbackUrl + "]");
-//            valid = false;
-//        }
+        // if ((this.pgtIou == null) != (this.proxyCallbackUrl == null)) {
+        // log
+        // .error("If we have a PGTIOU, there must have been a URL to which the PGT itself was sent.  "
+        // + "However, here, one but not the other was null.  PGTIOU=["
+        // + pgtIou
+        // + "] and proxyCallbackUrl=["
+        // + this.proxyCallbackUrl + "]");
+        // valid = false;
+        // }
 
-        if (this.primaryAuthentication && !this.proxyList.isEmpty()) {
-            log
-                    .error("If authentication was by primary credentials then it could not have been proxied. "
-                            + "Yet, primaryAuthentication is true where proxyList is not empty.  Receipt:["
-                            + this + "]");
+        if (this.primaryAuthentication && !this.proxyList.isEmpty())
+        {
+            log.error("If authentication was by primary credentials then it could not have been proxied. "
+                    + "Yet, primaryAuthentication is true where proxyList is not empty.  Receipt:[" + this + "]");
             valid = false;
         }
 

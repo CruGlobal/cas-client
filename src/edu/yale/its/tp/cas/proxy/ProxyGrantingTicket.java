@@ -20,7 +20,8 @@ import edu.yale.its.tp.cas.util.SecureURL;
  * @author andrew.petro@yale.edu
  * @version $Revision: 1.1 $ $Date: 2004/08/09 00:55:47 $
  */
-class ProxyGrantingTicket {
+class ProxyGrantingTicket
+{
 
     private static Log log = LogFactory.getLog(ProxyGrantingTicket.class);
 
@@ -39,19 +40,19 @@ class ProxyGrantingTicket {
      * Instantiate a new ProxyGrantingTicket with the given pgtId and
      * casProxyUrl.
      * 
-     * @param pgtId -
-     *            the proxy granting ticket identifier
-     * @param casProxyUrl -
-     *            the URL whereat the pgtId can be used to obtain a proxy
+     * @param pgtId
+     *            - the proxy granting ticket identifier
+     * @param casProxyUrl
+     *            - the URL whereat the pgtId can be used to obtain a proxy
      *            ticket.
-     * @throws IllegalArgumentException -
-     *             if either parameter is null
+     * @throws IllegalArgumentException
+     *             - if either parameter is null
      */
-    ProxyGrantingTicket(String pgtId, String casProxyUrl) {
+    ProxyGrantingTicket(String pgtId, String casProxyUrl)
+    {
         if (pgtId == null || casProxyUrl == null)
-            throw new IllegalArgumentException(
-                    "Cannot instantiate ProxyGrantingTicket(" + pgtId + ","
-                            + casProxyUrl + ")");
+            throw new IllegalArgumentException("Cannot instantiate ProxyGrantingTicket(" + pgtId + "," + casProxyUrl
+                    + ")");
         this.pgtId = pgtId;
         this.casProxyUrl = casProxyUrl;
     }
@@ -59,44 +60,45 @@ class ProxyGrantingTicket {
     /**
      * Retrieves a proxy ticket for the given target using this PGT.
      * 
-     * @param target -
-     *            the target service for which a proxy ticket is desired.
+     * @param target
+     *            - the target service for which a proxy ticket is desired.
      * @return Proxy ticket for presentation to the given service, or null if
      *         unable to retrieve proxy ticket for given pgtIou.
-     * @throws IOException -
-     *             upon failure to contact CAS server.
+     * @throws IOException
+     *             - upon failure to contact CAS server.
      */
-    public String getProxyTicket(String target) throws IOException {
-        if (log.isTraceEnabled()) {
-            log.trace("entering getProxyTicket(target=[" + target
-                    + "]) of PGT " + this);
+    public String getProxyTicket(String target) throws IOException
+    {
+        if (log.isTraceEnabled())
+        {
+            log.trace("entering getProxyTicket(target=[" + target + "]) of PGT " + this);
         }
 
         String proxyTicket = null;
 
         // retrieve an XML response from CAS's "Proxy" actuator
-        String url = this.casProxyUrl + "?pgt=" + this.pgtId
-                + "&targetService=" + target;
+        String url = this.casProxyUrl + "?pgt=" + this.pgtId + "&targetService=" + target;
         String response = SecureURL.retrieve(url);
 
         // parse this response (use a lightweight approach for now)
-        if (response.indexOf("<cas:proxySuccess>") != -1
-                && response.indexOf("<cas:proxyTicket>") != -1) {
-            int startIndex = response.indexOf("<cas:proxyTicket>")
-                    + "<cas:proxyTicket>".length();
+        if (response.indexOf("<cas:proxySuccess>") != -1 && response.indexOf("<cas:proxyTicket>") != -1)
+        {
+            int startIndex = response.indexOf("<cas:proxyTicket>") + "<cas:proxyTicket>".length();
             int endIndex = response.indexOf("</cas:proxyTicket>");
             proxyTicket = response.substring(startIndex, endIndex);
-        } else {
-            log.error("CAS server responded with error for request [" + url
-                    + "].  Full response was [" + response + "]");
+        }
+        else
+        {
+            log.error("CAS server responded with error for request [" + url + "].  Full response was [" + response
+                    + "]");
         }
 
-        log.trace("returning from getProxyTicket() with proxy ticket ["
-                + proxyTicket + "]");
+        log.trace("returning from getProxyTicket() with proxy ticket [" + proxyTicket + "]");
         return proxyTicket;
     }
-    
-    public String toString() {
+
+    public String toString()
+    {
         StringBuffer sb = new StringBuffer();
         sb.append(this.getClass().getName());
         sb.append(" pgtId=[").append(this.pgtId).append("] ");

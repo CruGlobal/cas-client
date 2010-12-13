@@ -28,66 +28,81 @@ import org.apache.commons.logging.LogFactory;
 /**
  * CCCI<br/>
  * <br/>
- * A filter to echo logout requests to other instances operating behind a load balancer.
- * This is copied from ProxyEchoFilter.
+ * A filter to echo logout requests to other instances operating behind a load
+ * balancer. This is copied from ProxyEchoFilter.
  * 
  * @author andrew.petro@yale.edu
  * @author Nathan.Kopp@ccci.org
  */
-public class LogoutEchoFilter implements Filter {
+public class LogoutEchoFilter implements Filter
+{
     private static final Log log = LogFactory.getLog(LogoutEchoFilter.class);
-    
+
     /**
-     * The name of the filter initialization parameter the value of which must be a 
-     * whitespace-delimited list of targets to which the logout requests should be echoed.
+     * The name of the filter initialization parameter the value of which must
+     * be a whitespace-delimited list of targets to which the logout requests
+     * should be echoed.
      * 
      * Uses the same settings as the proxy echo filter
      */
     public static final String INIT_PARAM_ECHO_TARGETS = "edu.yale.its.tp.cas.logout.echo.targets";
-    
+
     /**
-     * The set of URLs of ProxyTicketReceptor instances to which this filter should echo.
+     * The set of URLs of ProxyTicketReceptor instances to which this filter
+     * should echo.
      */
     private Set echoTargets = new HashSet();
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.servlet.Filter#init(javax.servlet.FilterConfig)
      */
-    public void init(FilterConfig config) throws ServletException {
-        if (log.isTraceEnabled()){
+    public void init(FilterConfig config) throws ServletException
+    {
+        if (log.isTraceEnabled())
+        {
             log.trace("initializing ProxyExchoFilter using config " + config);
         }
         String echoTargetsParam = config.getInitParameter(INIT_PARAM_ECHO_TARGETS);
-        if (echoTargetsParam == null){
-            throw new ServletException("The ProxyEchoFilter requires initialization parameter " + INIT_PARAM_ECHO_TARGETS + " to be a whitespace delimited list of echo targets.");
-        }
+        if (echoTargetsParam == null) { throw new ServletException(
+            "The ProxyEchoFilter requires initialization parameter " + INIT_PARAM_ECHO_TARGETS
+                    + " to be a whitespace delimited list of echo targets."); }
         StringTokenizer st = new StringTokenizer(echoTargetsParam);
-        while (st.hasMoreTokens()){
+        while (st.hasMoreTokens())
+        {
             String target = st.nextToken();
             this.echoTargets.add(target);
         }
-        if (log.isTraceEnabled()){
+        if (log.isTraceEnabled())
+        {
             log.trace("returning from init() having initialized " + this);
         }
     }
 
-    /* (non-Javadoc)
-     * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest, javax.servlet.ServletResponse, javax.servlet.FilterChain)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see javax.servlet.Filter#doFilter(javax.servlet.ServletRequest,
+     * javax.servlet.ServletResponse, javax.servlet.FilterChain)
      */
-    public void doFilter(ServletRequest request, ServletResponse response,
-            FilterChain fc) throws IOException, ServletException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain fc) throws IOException,
+            ServletException
+    {
 
         // test to see if this should be echoed
-        if(request.getParameter("ticket")!=null && request.getParameter("ticket").startsWith("-"))
+        if (request.getParameter("ticket") != null && request.getParameter("ticket").startsWith("-"))
         {
-            //int successes = echoRequest(pgtIou, request.getParameter(ProxyTicketReceptor.PGT_ID_PARAM));
+            // int successes = echoRequest(pgtIou,
+            // request.getParameter(ProxyTicketReceptor.PGT_ID_PARAM));
             int successes = echoRequest(request);
 
             log.debug("Echoed the logout request to " + successes + " of " + this.echoTargets.size() + " targets.");
 
-            // pass on the request so that this ProxyTicketReceptor will receive it.
+            // pass on the request so that this ProxyTicketReceptor will receive
+            // it.
             fc.doFilter(request, response);
-         }
+        }
     }
 
     /**
@@ -96,24 +111,23 @@ public class LogoutEchoFilter implements Filter {
      * @return the number of echoes successfully executed.
      * @throws MalformedURLException
      */
-    private int echoRequest(ServletRequest request) throws MalformedURLException{
+    private int echoRequest(ServletRequest request) throws MalformedURLException
+    {
         /*
-         * I hate this URLs as concatenated strings.
-         * This should be refactored to use a real URL class, preferably back
-         * when the URLs were parsed in init().
-         * However, this should work.  -awp9
+         * I hate this URLs as concatenated strings. This should be refactored
+         * to use a real URL class, preferably back when the URLs were parsed in
+         * init(). However, this should work. -awp9
          */
         int successes = 0;
         for (Iterator iter = this.echoTargets.iterator(); iter.hasNext();)
         {
             StringBuffer target = new StringBuffer((String) iter.next());
-            
-            
+
             Enumeration enumeration = request.getAttributeNames();
-            for(;enumeration.hasMoreElements();)
+            for (; enumeration.hasMoreElements();)
             {
-                String name = (String)enumeration.nextElement();
-                if(target.indexOf("?")>-1)
+                String name = (String) enumeration.nextElement();
+                if (target.indexOf("?") > -1)
                     target.append("?");
                 else
                     target.append("&");
@@ -121,24 +135,31 @@ public class LogoutEchoFilter implements Filter {
                 target.append("=");
                 target.append(request.getParameter(name));
             }
-            try {
+            try
+            {
                 SecureURL.retrieve(target.toString());
                 successes++;
-            } catch (Throwable t) {
+            }
+            catch (Throwable t)
+            {
                 log.error("Failed to retrieve [" + target.toString() + "]", t);
             }
         }
         return successes;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see javax.servlet.Filter#destroy()
      */
-    public void destroy() {
-      // do nothing
+    public void destroy()
+    {
+        // do nothing
     }
-    
-    public String toString(){
+
+    public String toString()
+    {
         StringBuffer sb = new StringBuffer();
         sb.append(this.getClass().getName());
         sb.append(" echoTargets=");
@@ -147,5 +168,3 @@ public class LogoutEchoFilter implements Filter {
     }
 
 }
-
-

@@ -19,12 +19,13 @@ import com.mockrunner.mock.web.MockServletContext;
 import junit.framework.TestCase;
 
 /**
- * Testcase for the ProxyTicketReceptor servlet.
- * This testcase should generate no network traffic.
+ * Testcase for the ProxyTicketReceptor servlet. This testcase should generate
+ * no network traffic.
  * 
  * @author andrew.petro@yale.edu
  */
-public class ProxyTicketReceptorTest extends TestCase {
+public class ProxyTicketReceptorTest extends TestCase
+{
 
     /**
      * Name of the servlet initialization parameter that ProxyTicketReceptor
@@ -55,11 +56,11 @@ public class ProxyTicketReceptorTest extends TestCase {
     /*
      * @see TestCase#setUp()
      */
-    protected void setUp() throws Exception {
+    protected void setUp() throws Exception
+    {
         super.setUp();
         this.basicConfig = new MockServletConfig();
-        this.basicConfig.setInitParameter(CASPROXYURL_INIT_PARAM_NAME,
-                "https://someplace.edu/cas/proxy");
+        this.basicConfig.setInitParameter(CASPROXYURL_INIT_PARAM_NAME, "https://someplace.edu/cas/proxy");
         this.mockRequest = new MockHttpServletRequest();
         this.mockResponse = new MockHttpServletResponse();
         this.basicContext = new MockServletContext();
@@ -71,11 +72,15 @@ public class ProxyTicketReceptorTest extends TestCase {
      * Test that servlet initialization fails when the configuration does
      * include the URL where CAS offers its ProxyTicket vending servlet.
      */
-    public void testNoCasProxyUrlInit() {
+    public void testNoCasProxyUrlInit()
+    {
         this.basicConfig.setInitParameter(CASPROXYURL_INIT_PARAM_NAME, null);
-        try {
+        try
+        {
             this.proxyTicketReceptor.init(this.basicConfig);
-        } catch (ServletException e) {
+        }
+        catch (ServletException e)
+        {
             // correct
             return;
         }
@@ -88,57 +93,73 @@ public class ProxyTicketReceptorTest extends TestCase {
      * 
      * @throws ServletException
      */
-    public void testBasicInit() throws ServletException {
+    public void testBasicInit() throws ServletException
+    {
         this.proxyTicketReceptor.init(this.basicConfig);
     }
 
     /**
      * Test basic servlet initialization, with the proxy ticket receptor URL set
-     * in the servlet context initialization parameter (not in the servlet initialization parameter).
+     * in the servlet context initialization parameter (not in the servlet
+     * initialization parameter).
+     * 
      * @throws ServletException
      */
-    public void testContextProxyUrlInit() throws ServletException {
+    public void testContextProxyUrlInit() throws ServletException
+    {
         this.basicConfig.setInitParameter(CASPROXYURL_INIT_PARAM_NAME, null);
-        this.basicContext.setInitParameter(CASPROXYURL_INIT_PARAM_NAME,
-                "https://someplace.com/cas/proxy");
+        this.basicContext.setInitParameter(CASPROXYURL_INIT_PARAM_NAME, "https://someplace.com/cas/proxy");
 
         this.proxyTicketReceptor.init(this.basicConfig);
     }
 
     /**
-     * Test that servlet initialization fails when cas proxy URL is not an https: URL.
+     * Test that servlet initialization fails when cas proxy URL is not an
+     * https: URL.
      */
-    public void testInsecureProxyUrlInit() {
+    public void testInsecureProxyUrlInit()
+    {
         this.basicConfig.setInitParameter(CASPROXYURL_INIT_PARAM_NAME, "http://www.insecure.com/cas/proxy");
-        try {
+        try
+        {
             this.proxyTicketReceptor.init(this.basicConfig);
-        } catch (ServletException e) {
+        }
+        catch (ServletException e)
+        {
             // correct
             return;
         }
         fail("Initialization should have thrown ServletException because casProxyUrl was not an https: URL.");
     }
-    
+
     /**
-     * Test that servlet initialization fails when cas proxy URL is not an https: URL,
-     * as set in servlet context initialization rather than servlet initialization.
+     * Test that servlet initialization fails when cas proxy URL is not an
+     * https: URL, as set in servlet context initialization rather than servlet
+     * initialization.
      */
-    public void testContextInsecureProxyUrlInit() {
+    public void testContextInsecureProxyUrlInit()
+    {
         this.basicConfig.setInitParameter(CASPROXYURL_INIT_PARAM_NAME, null);
         this.basicContext.setInitParameter(CASPROXYURL_INIT_PARAM_NAME, "http://www.insecure.com/cas/proxy");
-        try {
+        try
+        {
             this.proxyTicketReceptor.init(this.basicConfig);
-        } catch (ServletException e) {
+        }
+        catch (ServletException e)
+        {
             // correct
             return;
         }
-        fail("Initialization should have thrown ServletException because casProxyUrl was not an https: URL.:" + this.proxyTicketReceptor);
+        fail("Initialization should have thrown ServletException because casProxyUrl was not an https: URL.:"
+                + this.proxyTicketReceptor);
     }
-    
+
     /**
-     * Test that the receptor successfully receives tickets without throwing an exception.
+     * Test that the receptor successfully receives tickets without throwing an
+     * exception.
      */
-    public void testReceiveProxyTicket() throws ServletException, IOException {
+    public void testReceiveProxyTicket() throws ServletException, IOException
+    {
         this.proxyTicketReceptor.init(this.basicConfig);
         this.mockRequest.setRequestURL("https://someplace.com/app/casProxyReceptor?pgtIou=FOO&pgtId=BAR");
         this.proxyTicketReceptor.doGet(this.mockRequest, this.mockResponse);
@@ -147,10 +168,12 @@ public class ProxyTicketReceptorTest extends TestCase {
 
     /**
      * Test that the receptor returns null on a request with an unknown pgtIou.
+     * 
      * @throws ServletException
      * @throws IOException
      */
-    public void testGetUnknownProxyTicket() throws ServletException, IOException {
+    public void testGetUnknownProxyTicket() throws ServletException, IOException
+    {
         this.proxyTicketReceptor.init(this.basicConfig);
         assertNull(ProxyTicketReceptor.getProxyTicket("SPLAT", "http://www.nowhere.com/someService"));
     }

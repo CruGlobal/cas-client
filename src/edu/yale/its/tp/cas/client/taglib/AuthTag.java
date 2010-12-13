@@ -43,178 +43,197 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 /**
- * <p>Authentication tag for use with the Yale Central Authentication
- * Service.</p>
- *
- * <p>Typical usage involves placing the tag at the top of the page.
- * The tag checks to determine if the attribute referenced by id/scope
- * exists; if it does, the tag has no runtime effect.  If the attribute
- * does not exist, however, a CAS authentication is necessary:
- * if no ticket is present, we redirect to CAS, and if a ticket is
- * present, we validate it.  Upon successful CAS authentication (either
- * by a pre-existing attribute or through CAS directly), we store the
- * NetID in the attribute referenced by id/scope.</p>
- *
+ * <p>
+ * Authentication tag for use with the Yale Central Authentication Service.
+ * </p>
+ * 
+ * <p>
+ * Typical usage involves placing the tag at the top of the page. The tag checks
+ * to determine if the attribute referenced by id/scope exists; if it does, the
+ * tag has no runtime effect. If the attribute does not exist, however, a CAS
+ * authentication is necessary: if no ticket is present, we redirect to CAS, and
+ * if a ticket is present, we validate it. Upon successful CAS authentication
+ * (either by a pre-existing attribute or through CAS directly), we store the
+ * NetID in the attribute referenced by id/scope.
+ * </p>
+ * 
  * @author Shawn Bayern
  * @author Drew Mazurek
  */
-public class AuthTag extends TagSupport {
+public class AuthTag extends TagSupport
+{
 
-	//*********************************************************************
-	// Internal state
+    // *********************************************************************
+    // Internal state
 
-	private String var; // tag attribute
-	private int scope; // tag attribute
-	private String casLogin, casValidate, service; // from children
-	private List acceptedProxies; // from children
-	private HttpServletRequest request;
-	private HttpServletResponse response;
+    private String var; // tag attribute
+    private int scope; // tag attribute
+    private String casLogin, casValidate, service; // from children
+    private List acceptedProxies; // from children
+    private HttpServletRequest request;
+    private HttpServletResponse response;
 
-	//*********************************************************************
-	// Tag logic
+    // *********************************************************************
+    // Tag logic
 
-	public int doStartTag() throws JspException {
-		// retrieve and save the request and response objects
-		request = (HttpServletRequest) pageContext.getRequest();
-		response = (HttpServletResponse) pageContext.getResponse();
+    public int doStartTag() throws JspException
+    {
+        // retrieve and save the request and response objects
+        request = (HttpServletRequest) pageContext.getRequest();
+        response = (HttpServletResponse) pageContext.getResponse();
 
-		// reset invocation-specific state
-		casLogin = null;
-		casValidate = null;
-		try {
-			service =
-				Util.getService(
-					request,
-					(String) pageContext.getServletContext().getInitParameter(
-						"edu.yale.its.tp.cas.serverName"));
-		} catch (ServletException ex) {
-			throw new JspException(ex);
-		}
-		acceptedProxies = new ArrayList();
-		return EVAL_BODY_INCLUDE;
-	}
+        // reset invocation-specific state
+        casLogin = null;
+        casValidate = null;
+        try
+        {
+            service = Util.getService(request, (String) pageContext.getServletContext().getInitParameter(
+                "edu.yale.its.tp.cas.serverName"));
+        }
+        catch (ServletException ex)
+        {
+            throw new JspException(ex);
+        }
+        acceptedProxies = new ArrayList();
+        return EVAL_BODY_INCLUDE;
+    }
 
-	public int doEndTag() throws JspTagException {
-		try {
-			// if our attribute's already present, don't do anything
-			if (pageContext.getAttribute(var, scope) != null)
-				return EVAL_PAGE;
+    public int doEndTag() throws JspTagException
+    {
+        try
+        {
+            // if our attribute's already present, don't do anything
+            if (pageContext.getAttribute(var, scope) != null) return EVAL_PAGE;
 
-			// otherwise, we need to authenticate via CAS
-			String ticket = request.getParameter("ticket");
+            // otherwise, we need to authenticate via CAS
+            String ticket = request.getParameter("ticket");
 
-			// no ticket?  redirect...
-			if (ticket == null || ticket.equals("")) {
-				if (casLogin == null)
-					throw new JspTagException(
-						"for pages that expect to be called without 'ticket' parameter, "
-							+ "cas:auth must have a cas:loginUrl subtag");
-				response.sendRedirect(casLogin + "?service=" + service);
-				return SKIP_PAGE;
-			}
+            // no ticket? redirect...
+            if (ticket == null || ticket.equals(""))
+            {
+                if (casLogin == null)
+                    throw new JspTagException("for pages that expect to be called without 'ticket' parameter, "
+                            + "cas:auth must have a cas:loginUrl subtag");
+                response.sendRedirect(casLogin + "?service=" + service);
+                return SKIP_PAGE;
+            }
 
-			// Yay, ticket!  Validate it.
-			String netid = getAuthenticatedNetid(ticket);
-			if (netid == null)
-				throw new JspTagException("Unexpected CAS authentication error");
+            // Yay, ticket! Validate it.
+            String netid = getAuthenticatedNetid(ticket);
+            if (netid == null) throw new JspTagException("Unexpected CAS authentication error");
 
-			// Store the authenticate user in the id/scope attribute
-			pageContext.setAttribute(var, netid, scope);
+            // Store the authenticate user in the id/scope attribute
+            pageContext.setAttribute(var, netid, scope);
 
-			return EVAL_PAGE;
+            return EVAL_PAGE;
 
-		} catch (IOException ex) {
-			throw new JspTagException(ex.getMessage());
-		} catch (SAXException ex) {
-			throw new JspTagException(ex.getMessage());
-		} catch (ParserConfigurationException ex) {
-			throw new JspTagException(ex.getMessage());
-		}
-	}
+        }
+        catch (IOException ex)
+        {
+            throw new JspTagException(ex.getMessage());
+        }
+        catch (SAXException ex)
+        {
+            throw new JspTagException(ex.getMessage());
+        }
+        catch (ParserConfigurationException ex)
+        {
+            throw new JspTagException(ex.getMessage());
+        }
+    }
 
-	//*********************************************************************
-	// Attribute accessors
+    // *********************************************************************
+    // Attribute accessors
 
-	public void setVar(String var) {
-		this.var = var;
-	}
+    public void setVar(String var)
+    {
+        this.var = var;
+    }
 
-	public void setScope(String scope) {
-		if (scope.equals("page"))
-			this.scope = PageContext.PAGE_SCOPE;
-		else if (scope.equals("request"))
-			this.scope = PageContext.REQUEST_SCOPE;
-		else if (scope.equals("session"))
-			this.scope = PageContext.SESSION_SCOPE;
-		else if (scope.equals("application"))
-			this.scope = PageContext.APPLICATION_SCOPE;
-		else
-			throw new IllegalArgumentException("invalid scope");
-	}
+    public void setScope(String scope)
+    {
+        if (scope.equals("page"))
+            this.scope = PageContext.PAGE_SCOPE;
+        else if (scope.equals("request"))
+            this.scope = PageContext.REQUEST_SCOPE;
+        else if (scope.equals("session"))
+            this.scope = PageContext.SESSION_SCOPE;
+        else if (scope.equals("application"))
+            this.scope = PageContext.APPLICATION_SCOPE;
+        else
+            throw new IllegalArgumentException("invalid scope");
+    }
 
-	//*********************************************************************
-	// Accessors for child tags
+    // *********************************************************************
+    // Accessors for child tags
 
-	public void setCasLogin(String url) {
-		casLogin = url;
-	}
+    public void setCasLogin(String url)
+    {
+        casLogin = url;
+    }
 
-	public void setCasValidate(String url) {
-		casValidate = url;
-	}
+    public void setCasValidate(String url)
+    {
+        casValidate = url;
+    }
 
-	public void addAuthorizedProxy(String proxyId) {
-		acceptedProxies.add(proxyId);
-	}
+    public void addAuthorizedProxy(String proxyId)
+    {
+        acceptedProxies.add(proxyId);
+    }
 
-	public void setService(String service) {
-		this.service = service;
-	}
+    public void setService(String service)
+    {
+        this.service = service;
+    }
 
-	//*********************************************************************
-	// Constructor and lifecycle management
+    // *********************************************************************
+    // Constructor and lifecycle management
 
-	public AuthTag() {
-		super();
-		init();
-	}
+    public AuthTag()
+    {
+        super();
+        init();
+    }
 
-	// Releases any resources we may have (or inherit)
-	public void release() {
-		super.release();
-		init();
-	}
+    // Releases any resources we may have (or inherit)
+    public void release()
+    {
+        super.release();
+        init();
+    }
 
-	// clears any internal state we might have
-	private void init() {
-		var = null;
-		scope = PageContext.PAGE_SCOPE;
-		casLogin = null;
-		casValidate = null;
-		acceptedProxies = null;
-	}
+    // clears any internal state we might have
+    private void init()
+    {
+        var = null;
+        scope = PageContext.PAGE_SCOPE;
+        casLogin = null;
+        casValidate = null;
+        acceptedProxies = null;
+    }
 
-	//*********************************************************************
-	// Utility methods
+    // *********************************************************************
+    // Utility methods
 
-	private String getAuthenticatedNetid(String ticket)
-		throws ParserConfigurationException, SAXException, IOException, JspTagException {
-		ProxyTicketValidator pv = new ProxyTicketValidator();
-		pv.setCasValidateUrl(casValidate);
-		pv.setServiceTicket(ticket);
-		pv.setService(service);
-		pv.validate();
-		if (!pv.isAuthenticationSuccesful())
-			throw new JspTagException(
-				"CAS authentication error: " + pv.getErrorCode());
-		if (pv.getProxyList().size() != 0) {
-			// ticket was proxied
-			if (acceptedProxies.size() == 0)
-				throw new JspTagException("this page does not accept proxied tickets");
-			else if (!acceptedProxies.contains(pv.getProxyList().get(0)))
-				throw new JspTagException(
-					"unauthorized top-level proxy: '" + pv.getProxyList().get(0) + "'");
-		}
-		return pv.getUser();
-	}
+    private String getAuthenticatedNetid(String ticket) throws ParserConfigurationException, SAXException, IOException,
+            JspTagException
+    {
+        ProxyTicketValidator pv = new ProxyTicketValidator();
+        pv.setCasValidateUrl(casValidate);
+        pv.setServiceTicket(ticket);
+        pv.setService(service);
+        pv.validate();
+        if (!pv.isAuthenticationSuccesful())
+            throw new JspTagException("CAS authentication error: " + pv.getErrorCode());
+        if (pv.getProxyList().size() != 0)
+        {
+            // ticket was proxied
+            if (acceptedProxies.size() == 0)
+                throw new JspTagException("this page does not accept proxied tickets");
+            else if (!acceptedProxies.contains(pv.getProxyList().get(0)))
+                throw new JspTagException("unauthorized top-level proxy: '" + pv.getProxyList().get(0) + "'");
+        }
+        return pv.getUser();
+    }
 }

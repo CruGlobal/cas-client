@@ -43,21 +43,21 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Provides utility functions in support of CAS clients.
  */
-public class Util {
+public class Util
+{
 
-	private static Log log = LogFactory.getLog(Util.class);
+    private static Log log = LogFactory.getLog(Util.class);
 
-  /**
-   * Returns a service ID (URL) as a composite of the preconfigured server
-   * name and the runtime request, removing the request parameter "ticket".
-   */
-  public static String getService(HttpServletRequest request, String server)
-      throws ServletException {
-    return getService(request, server, true);
-  }
-  
-  
-  public static String getService(HttpServletRequest request, String server, boolean encode) throws ServletException
+    /**
+     * Returns a service ID (URL) as a composite of the preconfigured server
+     * name and the runtime request, removing the request parameter "ticket".
+     */
+    public static String getService(HttpServletRequest request, String server) throws ServletException
+    {
+        return getService(request, server, true);
+    }
+
+    public static String getService(HttpServletRequest request, String server, boolean encode) throws ServletException
     {
         if (log.isTraceEnabled())
         {
@@ -119,9 +119,9 @@ public class Util {
                 }
             }
         }
-        
-        if(!encode) return sb.toString();
-        
+
+        if (!encode) return sb.toString();
+
         String encodedService = URLEncoder.encode(sb.toString());
         if (log.isTraceEnabled())
         {

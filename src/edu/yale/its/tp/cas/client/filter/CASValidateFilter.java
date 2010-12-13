@@ -33,14 +33,17 @@ import edu.yale.its.tp.cas.client.Util;
  * </p>
  * <p>
  * Very much like CASFilter, except only performs validation, not redirection,
- * and performs no authorization role.  Does not check for the existence or identity of the
- * immediately previous service in the proxy chain, if any.  Does not, unlike the CASFilter itself,
- * require anything of a CASReceipt already stored in the session.  This filter exists merely
- * to validate and expose the results of valid, authentic CAS tickets.
+ * and performs no authorization role. Does not check for the existence or
+ * identity of the immediately previous service in the proxy chain, if any. Does
+ * not, unlike the CASFilter itself, require anything of a CASReceipt already
+ * stored in the session. This filter exists merely to validate and expose the
+ * results of valid, authentic CAS tickets.
  * </p>
- * <p>Subsequent filters can be used to perform authorization requirements
- * on the CASReceipt or translate the receipt into information that the client application
- * can understand and consume.</p>
+ * <p>
+ * Subsequent filters can be used to perform authorization requirements on the
+ * CASReceipt or translate the receipt into information that the client
+ * application can understand and consume.
+ * </p>
  * 
  * <p>
  * The following filter initialization parameters should be declared in
@@ -50,15 +53,14 @@ import edu.yale.its.tp.cas.client.Util;
  * <ul>
  * <li><code>edu.yale.its.tp.cas.client.filter.validateUrl</code>: URL to
  * validation URL on CAS server. (Required)</li>
- * <li><code>edu.yale.its.tp.cas.client.filter.serviceUrl</code>: URL of
- * this service. (Required if <code>serverName</code> is not specified)</li>
- * <li><code>edu.yale.its.tp.cas.client.filter.serverName</code>: full
- * hostname with port number (e.g. <code>www.foo.com:8080</code>). Port
- * number isn't required if it is standard (80 for HTTP, 443 for HTTPS).
- * (Required if <code>serviceUrl</code> is not specified)</li>
- * <li><code>edu.yale.its.tp.cas.client.filter.proxyCallbackUrl</code>: URL
- * of local proxy callback listener used to acquire PGT/PGTIOU. (Optional.)
- * </li>
+ * <li><code>edu.yale.its.tp.cas.client.filter.serviceUrl</code>: URL of this
+ * service. (Required if <code>serverName</code> is not specified)</li>
+ * <li><code>edu.yale.its.tp.cas.client.filter.serverName</code>: full hostname
+ * with port number (e.g. <code>www.foo.com:8080</code>). Port number isn't
+ * required if it is standard (80 for HTTP, 443 for HTTPS). (Required if
+ * <code>serviceUrl</code> is not specified)</li>
+ * <li><code>edu.yale.its.tp.cas.client.filter.proxyCallbackUrl</code>: URL of
+ * local proxy callback listener used to acquire PGT/PGTIOU. (Optional.)</li>
  * <li><code>edu.yale.its.tp.cas.client.filter.renew</code>: value of CAS
  * "renew" parameter. Bypasses single sign-on and requires user to provide CAS
  * with his/her credentials again. (Optional. If nothing is specified, this
@@ -91,13 +93,15 @@ import edu.yale.its.tp.cas.client.Util;
  * PGTIOU. The PGTIOU will be returned to this filter and will be accessible
  * through the CASReceipt. You may then acquire proxy tickets to other services
  * by calling
- * <code>edu.yale.its.tp.cas.proxy.ProxyTicketReceptor.getProxyTicket(pgtIou, targetService)</code>.
+ * <code>edu.yale.its.tp.cas.proxy.ProxyTicketReceptor.getProxyTicket(pgtIou, targetService)</code>
+ * .
  * 
  * Based on the CASFilter by Shawn Bayern and Drew Mazurek.
  * 
  * @author andrew.petro@yale.edu
  */
-public class CASValidateFilter implements Filter {
+public class CASValidateFilter implements Filter
+{
 
     private static Log log = LogFactory.getLog(CASValidateFilter.class);
 
@@ -162,7 +166,7 @@ public class CASValidateFilter implements Filter {
      */
     public final static String CAS_FILTER_RECEIPT = "edu.yale.its.tp.cas.client.filter.receipt";
 
-    //*********************************************************************
+    // *********************************************************************
     // Configuration state
 
     /** Secure URL whereat CAS offers its CAS 2.0 validate service */
@@ -191,120 +195,108 @@ public class CASValidateFilter implements Filter {
      * getRemoteUser();
      */
     private boolean wrapRequest;
-    
+
     /** CCCI */
     private String remoteUserAttrib = null;
-    
+
     /**
      * CCCI
      * 
-     * List of tickets that are pending logout.  The next time the user
-     * appears, they will be logged out.
+     * List of tickets that are pending logout. The next time the user appears,
+     * they will be logged out.
      */
     private static List logoutList = new ArrayList();
-    
+
     /**
-     * CCCI 
-     * List of ProxyTicketReceptor URLs of services authorized to proxy to the path
-     * behind this filter.
+     * CCCI List of ProxyTicketReceptor URLs of services authorized to proxy to
+     * the path behind this filter.
      */
     private List authorizedProxies = new ArrayList();
 
-
-
-    //*********************************************************************
+    // *********************************************************************
     // Initialization
 
-    public void init(FilterConfig config) throws ServletException {
+    public void init(FilterConfig config) throws ServletException
+    {
         casValidate = config.getInitParameter(VALIDATE_INIT_PARAM);
         casServiceUrl = config.getInitParameter(SERVICE_INIT_PARAM);
-        casRenew = Boolean.valueOf(config.getInitParameter(RENEW_INIT_PARAM))
-                .booleanValue();
+        casRenew = Boolean.valueOf(config.getInitParameter(RENEW_INIT_PARAM)).booleanValue();
         casServerName = config.getInitParameter(SERVERNAME_INIT_PARAM);
-        casProxyCallbackUrl = config
-                .getInitParameter(PROXY_CALLBACK_INIT_PARAM);
-        wrapRequest = Boolean.valueOf(
-                config.getInitParameter(WRAP_REQUESTS_INIT_PARAM))
-                .booleanValue();
-        remoteUserAttrib =
-            config.getInitParameter(
-                CASFilter.REMOTE_USER_ATTRIB_INIT_PARAM);
+        casProxyCallbackUrl = config.getInitParameter(PROXY_CALLBACK_INIT_PARAM);
+        wrapRequest = Boolean.valueOf(config.getInitParameter(WRAP_REQUESTS_INIT_PARAM)).booleanValue();
+        remoteUserAttrib = config.getInitParameter(CASFilter.REMOTE_USER_ATTRIB_INIT_PARAM);
 
-        if (casServerName != null && casServiceUrl != null) {
-            throw new ServletException(
-                    "serverName and serviceUrl cannot both be set: choose one.");
-        }
+        if (casServerName != null && casServiceUrl != null) { throw new ServletException(
+            "serverName and serviceUrl cannot both be set: choose one."); }
         // CCCI - commented this out
-//        if (casServerName == null && casServiceUrl == null) {
-//            throw new ServletException("one of serverName or serviceUrl must be set.");
-//        }
-        if (casServiceUrl != null) {
-            if (!(casServiceUrl.startsWith("https://") || (casServiceUrl
-                    .startsWith("http://")))) {
-                throw new ServletException(
-                        "service URL must start with http:// or https://; its current value is ["
-                                + casServiceUrl + "]");
-            }
+        // if (casServerName == null && casServiceUrl == null) {
+        // throw new
+        // ServletException("one of serverName or serviceUrl must be set.");
+        // }
+        if (casServiceUrl != null)
+        {
+            // if (!(casServiceUrl.startsWith("https://") || (casServiceUrl
+            // .startsWith("http://")))) {
+            // throw new ServletException(
+            // "service URL must start with http:// or https://; its current value is ["
+            // + casServiceUrl + "]");
+            // }
         }
 
-        if (casValidate == null) {
-            throw new ServletException("validateUrl parameter must be set.");
-        }
-        if (!casValidate.startsWith("https://")) {
-            throw new ServletException(
-                    "validateUrl must start with https://, its current value is ["
-                            + casValidate + "]");
-        }
+        if (casValidate == null) { throw new ServletException("validateUrl parameter must be set."); }
+        // if (!casValidate.startsWith("https://")) {
+        // throw new ServletException(
+        // "validateUrl must start with https://, its current value is ["
+        // + casValidate + "]");
+        // }
 
-        if (log.isDebugEnabled()) {
-            log
-                    .debug(("CASValidateFilter initialized as: [" + toString() + "]"));
+        if (log.isDebugEnabled())
+        {
+            log.debug(("CASValidateFilter initialized as: [" + toString() + "]"));
         }
     }
 
-    //*********************************************************************
+    // *********************************************************************
     // Filter processing
 
-    public void doFilter(ServletRequest request, ServletResponse response,
-            FilterChain fc) throws ServletException, IOException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain fc) throws ServletException,
+            IOException
+    {
 
-        if (log.isTraceEnabled()) {
+        if (log.isTraceEnabled())
+        {
             log.trace("entering doFilter()");
         }
 
         // make sure we've got an HTTP request
-        if (!(request instanceof HttpServletRequest)
-                || !(response instanceof HttpServletResponse)) {
-            log
-                    .error("doFilter() called on a request or response that was not an HttpServletRequest or response.");
+        if (!(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse))
+        {
+            log.error("doFilter() called on a request or response that was not an HttpServletRequest or response.");
             throw new ServletException("CASFilter protects only HTTP resources");
         }
 
         // Is this a request for the proxy callback listener? If so, pass
         // it through
-        if (casProxyCallbackUrl != null
-                && casProxyCallbackUrl.endsWith(((HttpServletRequest) request)
-                        .getRequestURI())
-                && request.getParameter("pgtId") != null
-                && request.getParameter("pgtIou") != null) {
-            log
-                    .trace("passing through what we hope is CAS's request for proxy ticket receptor.");
+        if (casProxyCallbackUrl != null && casProxyCallbackUrl.endsWith(((HttpServletRequest) request).getRequestURI())
+                && request.getParameter("pgtId") != null && request.getParameter("pgtIou") != null)
+        {
+            log.trace("passing through what we hope is CAS's request for proxy ticket receptor.");
             fc.doFilter(request, response);
             return;
         }
 
         // CCCI
-        // Is this a request for logout?  If so, process it
-        if (request.getParameter("ticket") != null
-            && request.getParameter("ticket").startsWith("-"))
+        // Is this a request for logout? If so, process it
+        if (request.getParameter("ticket") != null && request.getParameter("ticket").startsWith("-"))
         {
             log.trace("processing logout request.");
             queueForLogout(request, response);
             return;
         }
-        
+
         // Wrap the request if desired
-        if (wrapRequest) {
+        if (wrapRequest)
+        {
             log.trace("Wrapping request with CASFilterRequestWrapper.");
             request = new CASFilterRequestWrapper((HttpServletRequest) request, remoteUserAttrib);
         }
@@ -314,8 +306,7 @@ public class CASValidateFilter implements Filter {
         // if our attribute's already present and valid, pass through the filter
         // chain
         CASReceipt receipt = (CASReceipt) session.getAttribute(CAS_FILTER_RECEIPT);
-        
-        
+
         // CCCI
         // if our attribute's already present but queued for logout, then handle
         // the logout
@@ -324,23 +315,24 @@ public class CASValidateFilter implements Filter {
             handleActualLogout(request, response);
             receipt = null;
         }
-        
-//        if (receipt != null) {
-//            log
-//                    .trace("CAS_FILTER_RECEIPT attribute was present - passing  request through filter..");
-//            fc.doFilter(request, response);
-//            return;
-//        }
+
+        // if (receipt != null) {
+        // log
+        // .trace("CAS_FILTER_RECEIPT attribute was present - passing  request through filter..");
+        // fc.doFilter(request, response);
+        // return;
+        // }
 
         // otherwise, we need to authenticate via CAS
         String ticket = request.getParameter("ticket");
-        
-        
+
         // CCCI
-        // if our attribute's already present and valid, pass through the filter chain
-        if (ticket==null && receipt != null && isReceiptAcceptable(receipt)) {
-                log.trace("CAS_FILTER_RECEIPT attribute was present and acceptable - passing  request through filter..");
-            if(session.getAttribute(CASFilter.CAS_FILTER_RECEIPT_IS_FRESH_BEFORE_REDIRECT)!=null)
+        // if our attribute's already present and valid, pass through the filter
+        // chain
+        if (ticket == null && receipt != null && isReceiptAcceptable(receipt))
+        {
+            log.trace("CAS_FILTER_RECEIPT attribute was present and acceptable - passing  request through filter..");
+            if (session.getAttribute(CASFilter.CAS_FILTER_RECEIPT_IS_FRESH_BEFORE_REDIRECT) != null)
             {
                 session.removeAttribute(CASFilter.CAS_FILTER_RECEIPT_IS_FRESH_BEFORE_REDIRECT);
             }
@@ -353,73 +345,81 @@ public class CASValidateFilter implements Filter {
         }
 
         // no ticket? no validation to be done, pass the request through.
-        if (ticket == null || ticket.equals("")) {
+        if (ticket == null || ticket.equals(""))
+        {
             log.trace("CAS ticket was not present on request.");
             fc.doFilter(request, response);
             return;
         }
 
-        try {
+        try
+        {
             receipt = getAuthenticatedUser((HttpServletRequest) request);
-        } catch (CASAuthenticationException e) {
+        }
+        catch (CASAuthenticationException e)
+        {
             log.error(e);
             throw new ServletException(e);
         }
 
         // Store the authenticated user in the session
-        if (session != null) { // probably unnecessary
+        if (session != null)
+        { // probably unnecessary
             session.setAttribute(CAS_FILTER_USER, receipt.getUserName());
             session.setAttribute(CASValidateFilter.CAS_FILTER_RECEIPT, receipt);
             // CCCI
             session.setAttribute(CASFilter.CAS_FILTER_RECEIPT_IS_FRESH, Boolean.TRUE);
             session.setAttribute(CASFilter.CAS_FILTER_RECEIPT_IS_FRESH_BEFORE_REDIRECT, Boolean.TRUE);
         }
-        if (log.isTraceEnabled()) {
-            log.trace("validated ticket to get authenticated receipt ["
-                    + receipt + "], now passing request along filter chain.");
+        if (log.isTraceEnabled())
+        {
+            log.trace("validated ticket to get authenticated receipt [" + receipt
+                    + "], now passing request along filter chain.");
         }
 
         // continue processing the request
-        
+
         // CCCI
-//        fc.doFilter(request, response);
-//        log.trace("returning from doFilter()");
-        
-        String redirectUrl = Util.getService((HttpServletRequest)request, casServerName, false);
+        // fc.doFilter(request, response);
+        // log.trace("returning from doFilter()");
+
+        String redirectUrl = Util.getService((HttpServletRequest) request, casServerName, false);
         // remove "ticket" parameter - mid-string
-        redirectUrl = redirectUrl.replaceAll("ticket=[^&]*&","");
+        redirectUrl = redirectUrl.replaceAll("ticket=[^&]*&", "");
         // remove "ticket" parameter - end-string
-        redirectUrl = redirectUrl.replaceAll("ticket=[^&]*$","");
-        redirectUrl = redirectUrl.replaceAll("&$","");
-        redirectUrl = redirectUrl.replaceAll("\\?$","");
-        System.out.println("AUTH: Redirecting to self to clean ticket:" + redirectUrl);
+        redirectUrl = redirectUrl.replaceAll("ticket=[^&]*$", "");
+        redirectUrl = redirectUrl.replaceAll("&$", "");
+        redirectUrl = redirectUrl.replaceAll("\\?$", "");
+//        System.out.println("AUTH: Redirecting to self to clean ticket:" + redirectUrl);
         ((HttpServletResponse) response).sendRedirect(redirectUrl);
-        
+
     }
 
-    //*********************************************************************
+    // *********************************************************************
     // Utility methods
 
     /**
      * CCCI
+     * 
      * @param request
      * @param response
      */
     private void handleActualLogout(ServletRequest request, ServletResponse response)
     {
-        HttpServletRequest req = (HttpServletRequest)request;
-        
+        HttpServletRequest req = (HttpServletRequest) request;
+
         // clear the session
         String[] vals = req.getSession().getValueNames();
-        for(int i=0; i<vals.length; i++)
+        for (int i = 0; i < vals.length; i++)
         {
             req.getSession().removeValue(vals[i]);
         }
-        //req.getSession().setAttribute("casLogoutInitiated",Boolean.TRUE);
+        // req.getSession().setAttribute("casLogoutInitiated",Boolean.TRUE);
     }
 
     /**
      * CCCI
+     * 
      * @param receipt
      * @return
      */
@@ -431,6 +431,7 @@ public class CASValidateFilter implements Filter {
 
     /**
      * CCCI
+     * 
      * @param request
      * @param response
      */
@@ -440,18 +441,21 @@ public class CASValidateFilter implements Filter {
         ticket = ticket.substring(1); // remove the leading "-"
         logoutList.add(ticket);
     }
-    
+
     /**
      * Converts a ticket parameter to a CASReceipt.
-     * @param request - request bearing the ticket parameter
+     * 
+     * @param request
+     *            - request bearing the ticket parameter
      * @return CASReceipt representing results of ticket validation
-     * @throws ServletException -
-     *             when unable to get service for request
-     * @throws CASAuthenticationException -
-     *             on authentication failure
+     * @throws ServletException
+     *             - when unable to get service for request
+     * @throws CASAuthenticationException
+     *             - on authentication failure
      */
-    private CASReceipt getAuthenticatedUser(HttpServletRequest request)
-            throws ServletException, CASAuthenticationException {
+    private CASReceipt getAuthenticatedUser(HttpServletRequest request) throws ServletException,
+            CASAuthenticationException
+    {
         log.trace("entering getAuthenticatedUser()");
         ProxyTicketValidator pv = null;
 
@@ -460,36 +464,35 @@ public class CASValidateFilter implements Filter {
         pv.setServiceTicket(request.getParameter("ticket"));
         pv.setService(getService(request));
         pv.setRenew(Boolean.valueOf(casRenew).booleanValue());
-        if (casProxyCallbackUrl != null) {
+        if (casProxyCallbackUrl != null)
+        {
             pv.setProxyCallbackUrl(casProxyCallbackUrl);
         }
-        if (log.isDebugEnabled()) {
+        if (log.isDebugEnabled())
+        {
             log.debug("about to validate ProxyTicketValidator: [" + pv + "]");
         }
 
         return CASReceipt.getReceipt(pv);
 
     }
-    
+
     /**
-     * CCCI 
-     * Is this receipt acceptable as evidence of authentication by
-     * credentials that would have been acceptable to this path?
-     * Current implementation checks whether from renew and whether proxy
-     * was authorized.
+     * CCCI Is this receipt acceptable as evidence of authentication by
+     * credentials that would have been acceptable to this path? Current
+     * implementation checks whether from renew and whether proxy was
+     * authorized.
+     * 
      * @param receipt
      * @return true if acceptable, false otherwise
      */
-    private boolean isReceiptAcceptable(CASReceipt receipt) {
-        if (receipt == null)
-            throw new IllegalArgumentException("Cannot evaluate a null receipt.");
-        if (this.casRenew && !receipt.isPrimaryAuthentication()){
-            return false;
-        }
-        if (receipt.isProxied()){
-            if (! this.authorizedProxies.contains(receipt.getProxyingService())){
-                return false;
-            }
+    private boolean isReceiptAcceptable(CASReceipt receipt)
+    {
+        if (receipt == null) throw new IllegalArgumentException("Cannot evaluate a null receipt.");
+        if (this.casRenew && !receipt.isPrimaryAuthentication()) { return false; }
+        if (receipt.isProxied())
+        {
+            if (!this.authorizedProxies.contains(receipt.getProxyingService())) { return false; }
         }
         return true;
     }
@@ -498,19 +501,19 @@ public class CASValidateFilter implements Filter {
      * Returns either the configured service or figures it out for the current
      * request. The returned service is URL-encoded.
      */
-    private String getService(HttpServletRequest request)
-            throws ServletException {
+    private String getService(HttpServletRequest request) throws ServletException
+    {
 
         log.trace("entering getService()");
         String serviceString;
 
         // ensure we have a server name or service name
-     // CCCI commented this out
-//        if (casServerName == null && casServiceUrl == null)
-//            throw new ServletException(
-//                    "need one of the following configuration "
-//                            + "parameters: edu.yale.its.tp.cas.client.filter.serviceUrl or "
-//                            + "edu.yale.its.tp.cas.client.filter.serverName");
+        // CCCI commented this out
+        // if (casServerName == null && casServiceUrl == null)
+        // throw new ServletException(
+        // "need one of the following configuration "
+        // + "parameters: edu.yale.its.tp.cas.client.filter.serviceUrl or "
+        // + "edu.yale.its.tp.cas.client.filter.serverName");
 
         // use the given string if it's provided
         if (casServiceUrl != null)
@@ -518,14 +521,15 @@ public class CASValidateFilter implements Filter {
         else
             // otherwise, return our best guess at the service
             serviceString = Util.getService(request, casServerName);
-        if (log.isTraceEnabled()) {
-            log.trace("returning from getService() with service ["
-                    + serviceString + "]");
+        if (log.isTraceEnabled())
+        {
+            log.trace("returning from getService() with service [" + serviceString + "]");
         }
         return serviceString;
     }
 
-    public String toString() {
+    public String toString()
+    {
         StringBuffer sb = new StringBuffer();
         sb.append("[CASValidateFilter:");
 
@@ -536,7 +540,8 @@ public class CASValidateFilter implements Filter {
         sb.append(casProxyCallbackUrl);
         sb.append("]");
 
-        if (this.casRenew) {
+        if (this.casRenew)
+        {
             sb.append(" casRenew=true");
         }
 
@@ -560,7 +565,8 @@ public class CASValidateFilter implements Filter {
      * 
      * @see javax.servlet.Filter#destroy()
      */
-    public void destroy() {
+    public void destroy()
+    {
     }
 }
 

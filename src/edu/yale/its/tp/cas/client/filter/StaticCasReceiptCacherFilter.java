@@ -21,45 +21,45 @@ import org.apache.commons.logging.LogFactory;
  * 
  * @author andrew.petro@yale.edu
  */
-public class StaticCasReceiptCacherFilter implements Filter {
+public class StaticCasReceiptCacherFilter implements Filter
+{
 
-    private static Log log = LogFactory
-            .getLog(StaticCasReceiptCacherFilter.class);
+    private static Log log = LogFactory.getLog(StaticCasReceiptCacherFilter.class);
 
-    private static Map ticketsToReceipts = Collections
-            .synchronizedMap(new HashMap());
+    private static Map ticketsToReceipts = Collections.synchronizedMap(new HashMap());
 
-    public void init(FilterConfig config) throws ServletException {
+    public void init(FilterConfig config) throws ServletException
+    {
 
     }
 
-    public void doFilter(ServletRequest request, ServletResponse response,
-            FilterChain fc) throws ServletException, IOException {
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain fc) throws ServletException,
+            IOException
+    {
 
-        if (log.isTraceEnabled()) {
+        if (log.isTraceEnabled())
+        {
             log.trace("entering doFilter()");
         }
 
         // make sure we've got an HTTP request
-        if (!(request instanceof HttpServletRequest)
-                || !(response instanceof HttpServletResponse)) {
-            log
-                    .error("doFilter() called on a request or response that was not an HttpServletRequest or response.");
-            throw new ServletException(
-                    "StaticCasReceiptCacherFilter applies to only HTTP resources");
+        if (!(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse))
+        {
+            log.error("doFilter() called on a request or response that was not an HttpServletRequest or response.");
+            throw new ServletException("StaticCasReceiptCacherFilter applies to only HTTP resources");
         }
 
         HttpSession session = ((HttpServletRequest) request).getSession();
 
         // if our attribute's already present and valid, pass through the filter
         // chain
-        CASReceipt receipt = (CASReceipt) session
-                .getAttribute(CASFilter.CAS_FILTER_RECEIPT);
+        CASReceipt receipt = (CASReceipt) session.getAttribute(CASFilter.CAS_FILTER_RECEIPT);
 
         // otherwise, we need to authenticate via CAS
         String ticket = request.getParameter("ticket");
 
-        if (ticket != null && receipt != null) {
+        if (ticket != null && receipt != null)
+        {
             StaticCasReceiptCacherFilter.ticketsToReceipts.put(ticket, receipt);
         }
 
@@ -68,7 +68,8 @@ public class StaticCasReceiptCacherFilter implements Filter {
         log.trace("returning from doFilter()");
     }
 
-    public String toString() {
+    public String toString()
+    {
         StringBuffer sb = new StringBuffer();
         sb.append("[CASFilter:");
         sb.append(StaticCasReceiptCacherFilter.ticketsToReceipts);
@@ -77,14 +78,18 @@ public class StaticCasReceiptCacherFilter implements Filter {
     }
 
     /**
-     * Get the cached CASReceipt, if any, for a given service or proxy ticket string,
-     * the validation of which yielded the receipt.
-     * @param ticket - a service or proxy ticket previously validated by the CASFilter.
-     * @return the CASReceipt representing the prior validation of the ticket, or null.
+     * Get the cached CASReceipt, if any, for a given service or proxy ticket
+     * string, the validation of which yielded the receipt.
+     * 
+     * @param ticket
+     *            - a service or proxy ticket previously validated by the
+     *            CASFilter.
+     * @return the CASReceipt representing the prior validation of the ticket,
+     *         or null.
      */
-    public static CASReceipt receiptForTicket(String ticket) {
-        return (CASReceipt) StaticCasReceiptCacherFilter.ticketsToReceipts
-                .get(ticket);
+    public static CASReceipt receiptForTicket(String ticket)
+    {
+        return (CASReceipt) StaticCasReceiptCacherFilter.ticketsToReceipts.get(ticket);
     }
 
     /*
@@ -92,7 +97,8 @@ public class StaticCasReceiptCacherFilter implements Filter {
      * 
      * @see javax.servlet.Filter#destroy()
      */
-    public void destroy() {
+    public void destroy()
+    {
     }
 }
 
