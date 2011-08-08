@@ -38,6 +38,7 @@ import java.util.Enumeration;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,6 +61,21 @@ public class CASFilterRequestWrapper extends HttpServletRequestWrapper
 
     // CCCI
     private String remoteUserAttrib;
+    
+    @Override
+    public HttpSession getSession()
+    {
+        // TODO Auto-generated method stub
+        return new CASFilterHttpSessionWrapper(super.getSession());
+    }
+    
+    @Override
+    public HttpSession getSession(boolean create)
+    {
+        HttpSession session = super.getSession(create);
+        if(session==null) return null;
+        return new CASFilterHttpSessionWrapper(session);
+    }
 
     public CASFilterRequestWrapper(HttpServletRequest request, String remoteUserAttrib)
     {
@@ -75,10 +91,12 @@ public class CASFilterRequestWrapper extends HttpServletRequestWrapper
     public String getHeader(String name)
     {
         if (name.equals(CASFilter.CAS_FILTER_USER)) return getRemoteUser();
+        if (name.equals("CAS_USER")) return getRemoteUser();
 
         if (name.startsWith("CAS_"))
         {
             CASReceipt receipt = (CASReceipt) getSession().getAttribute(CASFilter.CAS_FILTER_RECEIPT);
+            if(receipt==null) return null;
             return (String) receipt.getAttributes().get(name.substring(4));
         }
 
@@ -95,20 +113,24 @@ public class CASFilterRequestWrapper extends HttpServletRequestWrapper
             a.add(e.nextElement());
         }
         a.add(CASFilter.CAS_FILTER_USER);
+        a.add("CAS_USER");
 
         CASReceipt receipt = (CASReceipt) getSession().getAttribute(CASFilter.CAS_FILTER_RECEIPT);
-        for (Object name : receipt.getAttributes().keySet())
+        if(receipt!=null)
         {
-            a.add("CAS_" + name);
+            for (Object name : receipt.getAttributes().keySet())
+            {
+                a.add("CAS_" + name);
+            }
         }
-
+        
         return Collections.enumeration(a);
     }
 
     @Override
     public Enumeration getHeaders(String name)
     {
-        if (name.equals(CASFilter.CAS_FILTER_USER))
+        if (name.equals(CASFilter.CAS_FILTER_USER) || name.equals("CAS_USER"))
         {
             ArrayList a = new ArrayList();
             a.add(getRemoteUser());
@@ -118,9 +140,12 @@ public class CASFilterRequestWrapper extends HttpServletRequestWrapper
         if (name.startsWith("CAS_"))
         {
             CASReceipt receipt = (CASReceipt) getSession().getAttribute(CASFilter.CAS_FILTER_RECEIPT);
-            ArrayList a = new ArrayList();
-            a.add(receipt.getAttributes().get(name.substring(4)));
-            return Collections.enumeration(a);
+            if(receipt!=null)
+            {
+                ArrayList a = new ArrayList();
+                a.add(receipt.getAttributes().get(name.substring(4)));
+                return Collections.enumeration(a);
+            }
         }
 
         return super.getHeaders(name);
@@ -137,11 +162,14 @@ public class CASFilterRequestWrapper extends HttpServletRequestWrapper
      */
     public String getRemoteUser()
     {
-        String user;
+        String user = null;
         if (remoteUserAttrib != null && remoteUserAttrib.trim().length() > 0)
         {
             CASReceipt receipt = (CASReceipt) getSession().getAttribute(CASFilter.CAS_FILTER_RECEIPT);
-            user = (String) receipt.getAttributes().get(remoteUserAttrib);
+            if(receipt!=null)
+            {
+                user = (String) receipt.getAttributes().get(remoteUserAttrib);
+            }
         }
         else
         {

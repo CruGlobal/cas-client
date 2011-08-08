@@ -388,7 +388,7 @@ public class CASFilter implements Filter
                     // request).getRequestURI()+" is excluded by pattern: "+p.toString());
                     log.trace("URL " + ((HttpServletRequest) request).getRequestURI() + " is excluded by pattern: "
                             + p.toString());
-                    fc.doFilter(request, response);
+                    fc.doFilter(wrapIfNecessary(request), response);
                     return;
                 }
                 // else
@@ -404,24 +404,17 @@ public class CASFilter implements Filter
                 && request.getParameter("pgtId") != null && request.getParameter("pgtIou") != null)
         {
             log.trace("passing through what we hope is CAS's request for proxy ticket receptor.");
-            fc.doFilter(request, response);
+            fc.doFilter(wrapIfNecessary(request), response);
             return;
         }
-
+        
         // CCCI
         // Is this a request for logout? If so, process it
-        if (request.getParameter("ticket") != null && request.getParameter("ticket").startsWith("-"))
+        if (!requestIsPost(request) && request.getParameter("ticket") != null && request.getParameter("ticket").startsWith("-"))
         {
             log.trace("processing logout request.");
             queueForLogout(request, response);
             return;
-        }
-
-        // Wrap the request if desired
-        if (wrapRequest)
-        {
-            log.trace("Wrapping request with CASFilterRequestWrapper.");
-            request = new CASFilterRequestWrapper((HttpServletRequest) request, remoteUserAttrib);
         }
 
         HttpSession session = ((HttpServletRequest) request).getSession();
@@ -438,7 +431,8 @@ public class CASFilter implements Filter
         }
 
         // otherwise, we need to authenticate via CAS
-        String ticket = request.getParameter("ticket");
+        String ticket = null;
+        if(!requestIsPost(request)) ticket = request.getParameter("ticket");
 
         // CCCI
         // if our attribute's already present and valid, pass through the filter
@@ -450,11 +444,11 @@ public class CASFilter implements Filter
             {
                 session.removeAttribute(CAS_FILTER_RECEIPT_IS_FRESH_BEFORE_REDIRECT);
             }
-            else
+            else if (session.getAttribute(CAS_FILTER_RECEIPT_IS_FRESH) != null)
             {
                 session.removeAttribute(CAS_FILTER_RECEIPT_IS_FRESH);
             }
-            fc.doFilter(request, response);
+            fc.doFilter(wrapIfNecessary(request), response);
             return;
         }
 
@@ -489,7 +483,7 @@ public class CASFilter implements Filter
                 {
                     log.trace("casGateway was true and CAS_FILTER_USER set: passing request along filter chain.");
                     // continue processing the request
-                    fc.doFilter(request, response);
+                    fc.doFilter(wrapIfNecessary(request), response);
                     return;
                 }
                 else
@@ -517,7 +511,7 @@ public class CASFilter implements Filter
             {
                 session.removeAttribute(CASFilter.CAS_FILTER_RECEIPT_IS_FRESH);
             }
-            fc.doFilter(request, response);
+            fc.doFilter(wrapIfNecessary(request), response);
             return;
         }
 
@@ -554,7 +548,7 @@ public class CASFilter implements Filter
         // continue processing the request
 
         // CCCI
-        // fc.doFilter(request, response);
+        // fc.doFilter(wrapIfNecessary(request), response);
         // log.trace("returning from doFilter()");
 
         String redirectUrl = Util.getService((HttpServletRequest) request, casServerName, false);
@@ -566,6 +560,25 @@ public class CASFilter implements Filter
         redirectUrl = redirectUrl.replaceAll("\\?$", "");
 //        System.out.println("AUTH: Redirecting to self to clean ticket:" + redirectUrl);
         ((HttpServletResponse) response).sendRedirect(redirectUrl);
+    }
+
+    private boolean requestIsPost(ServletRequest request)
+    {
+        return ((HttpServletRequest) request).getMethod().equalsIgnoreCase("POST");
+    }
+
+    private ServletRequest wrapIfNecessary(ServletRequest request)
+    {
+        // Wrap the request if desired
+        if (wrapRequest && !(request instanceof CASFilterRequestWrapper))
+        {
+            log.trace("Wrapping request with CASFilterRequestWrapper.");
+            return new CASFilterRequestWrapper((HttpServletRequest) request, remoteUserAttrib);
+        }
+        else
+        {
+            return request;
+        }
     }
 
     /**
@@ -607,6 +620,7 @@ public class CASFilter implements Filter
      */
     private void queueForLogout(ServletRequest request, ServletResponse response)
     {
+        if(requestIsPost(request)) return; 
         String ticket = request.getParameter("ticket");
         ticket = ticket.substring(1); // remove the leading "-"
         logoutList.add(ticket);
