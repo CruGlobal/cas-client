@@ -5,6 +5,8 @@
 	Last modfied by: $Author: awp9 $
 	-->
 
+    <property name="version"  value="2.1.1"/>
+
 	<!-- Path used for compiling. -->
 	<path id="compileLib">
 		<fileset dir="lib" />
@@ -24,7 +26,7 @@
 	</target>
 
 	<target name="compile" depends="prepare" description="Compile the Java into classes.">
-		<javac destdir="build" deprecation="true" debug="on">
+		<javac destdir="build" deprecation="true" debug="on" target="1.5">
 			<classpath refid="compileLib" />
 			<src path="src" />
 			<src path="test" />
@@ -32,7 +34,7 @@
 	</target>
 
 	<target name="jar" depends="compile" description="Jar the classes.">
-		<jar jarfile="dist/casclient-ccci-2.1.0.jar" basedir="build" />
+		<jar jarfile="dist/casclient-ccci-${version}.jar" basedir="build" />
 	</target>
 
 	<target name="sourcejar" depends="prepare" description="Jar up the source code.">
