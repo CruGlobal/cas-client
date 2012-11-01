@@ -5,7 +5,7 @@
 	Last modfied by: $Author: awp9 $
 	-->
 
-    <property name="version"  value="2.1.1"/>
+    <property name="version"  value="2.1.2"/>
 
 	<!-- Path used for compiling. -->
 	<path id="compileLib">

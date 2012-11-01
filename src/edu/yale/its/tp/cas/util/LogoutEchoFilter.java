@@ -21,6 +21,7 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,6 +34,7 @@ import org.apache.commons.logging.LogFactory;
  * 
  * @author andrew.petro@yale.edu
  * @author Nathan.Kopp@ccci.org
+ * @author Matt Drees
  */
 public class LogoutEchoFilter implements Filter
 {
@@ -46,6 +48,8 @@ public class LogoutEchoFilter implements Filter
      * Uses the same settings as the proxy echo filter
      */
     public static final String INIT_PARAM_ECHO_TARGETS = "edu.yale.its.tp.cas.logout.echo.targets";
+    
+    public static final String INIT_PARAM_CONTINUE_CHAIN = "edu.yale.its.tp.cas.logout.echo.continueChain";
 
     /**
      * The set of URLs of ProxyTicketReceptor instances to which this filter
@@ -53,6 +57,8 @@ public class LogoutEchoFilter implements Filter
      */
     private Set echoTargets = new HashSet();
 
+    private boolean continueChain = true;
+    
     /*
      * (non-Javadoc)
      * 
@@ -74,6 +80,12 @@ public class LogoutEchoFilter implements Filter
             String target = st.nextToken();
             this.echoTargets.add(target);
         }
+        String continueChainParam = config.getInitParameter(INIT_PARAM_CONTINUE_CHAIN);
+        if (continueChainParam != null)
+        {
+            this.continueChain = Boolean.parseBoolean(continueChainParam);
+        }
+        
         if (log.isTraceEnabled())
         {
             log.trace("returning from init() having initialized " + this);
@@ -99,9 +111,19 @@ public class LogoutEchoFilter implements Filter
 
             log.debug("Echoed the logout request to " + successes + " of " + this.echoTargets.size() + " targets.");
 
-            // pass on the request so that this ProxyTicketReceptor will receive
-            // it.
-            fc.doFilter(request, response);
+            if (continueChain)
+            {
+                // pass on the request so that this ProxyTicketReceptor will receive
+                // it.
+                fc.doFilter(request, response);
+            }
+            else
+            {
+                HttpServletResponse httpResponse = (HttpServletResponse) response;
+                httpResponse.setStatus(HttpServletResponse.SC_OK);
+                httpResponse.setContentType("text/plain");
+                httpResponse.getWriter().write("logout request received");
+            }
         }
     }
 
@@ -123,17 +145,19 @@ public class LogoutEchoFilter implements Filter
         {
             StringBuffer target = new StringBuffer((String) iter.next());
 
-            Enumeration enumeration = request.getAttributeNames();
+            Enumeration enumeration = request.getParameterNames();
+            boolean first = true;
             for (; enumeration.hasMoreElements();)
             {
                 String name = (String) enumeration.nextElement();
-                if (target.indexOf("?") > -1)
+                if (first && target.indexOf("?") == -1)
                     target.append("?");
                 else
                     target.append("&");
                 target.append(name);
                 target.append("=");
                 target.append(request.getParameter(name));
+                first = false;
             }
             try
             {
