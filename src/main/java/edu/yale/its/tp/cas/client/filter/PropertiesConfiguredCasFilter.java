@@ -10,7 +10,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import java.util.*;
 
-public class CASFilterWithProps extends CASFilter {
+public class PropertiesConfiguredCasFilter extends CASFilter {
 
     Set<String> casFilterInitParameterNames =
             Sets.newHashSet(LOGIN_INIT_PARAM,
