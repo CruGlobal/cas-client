@@ -1,5 +1,6 @@
 package edu.yale.its.tp.cas.client.filter;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -9,6 +10,8 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import java.util.*;
+
+import static java.util.Collections.list;
 
 public class PropertiesConfiguredCasFilter extends CASFilter {
 
@@ -32,9 +35,11 @@ public class PropertiesConfiguredCasFilter extends CASFilter {
 
     @Override
     public void init(final FilterConfig webXmlConfig) throws ServletException {
+        Preconditions.checkNotNull(properties, "Must inject @CasFilterProperties Properties");
         final HashMap<String, String> filterInitParameters = Maps.newHashMap();
 
-        for (String initParameterName : Collections.list(webXmlConfig.getInitParameterNames())) {
+        List<String> initParameterNames = list(webXmlConfig.getInitParameterNames());
+        for (String initParameterName : initParameterNames) {
             filterInitParameters.put(initParameterName, webXmlConfig.getInitParameter(initParameterName));
         }
 
