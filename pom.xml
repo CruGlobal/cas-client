@@ -121,6 +121,16 @@
                 <artifactId>maven-war-plugin</artifactId>
                 <version>2.1.1</version>
             </plugin>
+	
+	    <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                    <compilerArgument>-proc:none</compilerArgument>
+                </configuration>
+            </plugin>
 
             <!-- Arquillian needs a version of surefire >= 2.9
              see https://community.jboss.org/wiki/WhatVersionOfSurefireShouldIUseToRunMyArquillianTestsInAMavenBuild -->
