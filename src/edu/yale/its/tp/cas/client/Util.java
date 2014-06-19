@@ -74,10 +74,7 @@ public class Util
         // now, construct our best guess at the string
         StringBuffer sb = new StringBuffer();
         // CCCI TODO - add "secure through proxy" ability
-        if (request.isSecure())
-            sb.append("https://");
-        else
-            sb.append("http://");
+        sb.append(request.getScheme()).append("://");
         // CCCI - added this section
         if (server == null)
         {
