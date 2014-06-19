@@ -47,6 +47,13 @@
         </dependency>
 
         <dependency>
+          <groupId>com.mockrunner</groupId>
+          <artifactId>mockrunner-servlet</artifactId>
+          <version>1.0.0</version>
+          <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.jboss.arquillian.testng</groupId>
             <artifactId>arquillian-testng-container</artifactId>
             <scope>test</scope>
