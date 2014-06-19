@@ -51,7 +51,7 @@ public class ProxyChainScrutinizerFilterTest extends TestCase {
         super.setUp();
         MockFilterConfig config = new MockFilterConfig();
         MockServletContext context = new MockServletContext();
-        context.setInitParameter(
+        config.setInitParameter(
                 ProxyChainScrutinizerFilter.AUTHORIZED_PROXIES_INITPARAM,
                 GOOD_AUTHORIZED_PROXIES_STRING);
         config.setupServletContext(context);
@@ -168,7 +168,7 @@ public class ProxyChainScrutinizerFilterTest extends TestCase {
     public void testGoodParam() throws ServletException {
         MockFilterConfig config = new MockFilterConfig();
         MockServletContext context = new MockServletContext();
-        context.setInitParameter(
+        config.setInitParameter(
                 ProxyChainScrutinizerFilter.AUTHORIZED_PROXIES_INITPARAM,
                 GOOD_AUTHORIZED_PROXIES_STRING);
         config.setupServletContext(context);
@@ -271,6 +271,7 @@ public class ProxyChainScrutinizerFilterTest extends TestCase {
         receipt.setProxyList(proxyList);
         mockSession.setAttribute(CASFilter.CAS_FILTER_RECEIPT, receipt);
         this.request.setSession(mockSession);
+        this.request.getSession(true);
         this.correctlyConfiguredFilter.doFilter(this.request, this.response,
                 this.filterChain);
         assertTrue(this.filterChain.isChainInvoked());
@@ -291,6 +292,7 @@ public class ProxyChainScrutinizerFilterTest extends TestCase {
         receipt.setProxyList(proxyList);
         mockSession.setAttribute(CASFilter.CAS_FILTER_RECEIPT, receipt);
         this.request.setSession(mockSession);
+        this.request.getSession(true);
         this.correctlyConfiguredFilter.doFilter(this.request, this.response,
                 this.filterChain);
         assertTrue(this.filterChain.isChainInvoked());
@@ -386,8 +388,8 @@ public class ProxyChainScrutinizerFilterTest extends TestCase {
         + " ; https://www.immediatelyPreviousAuthenticationProxyingService.com https://secure.com/middleTierService https://secure.com/userInterface";
 
         MockServletContext context = new MockServletContext();
-        context.setInitParameter(ProxyChainScrutinizerFilter.AUTHORIZED_PROXIES_INITPARAM, authorizedProxiesInitParam);
         MockFilterConfig config = new MockFilterConfig();
+        config.setInitParameter(ProxyChainScrutinizerFilter.AUTHORIZED_PROXIES_INITPARAM, authorizedProxiesInitParam);
         config.setupServletContext(context);
         ProxyChainScrutinizerFilter localFilter = new ProxyChainScrutinizerFilter();
         localFilter.init(config);
@@ -397,6 +399,8 @@ public class ProxyChainScrutinizerFilterTest extends TestCase {
         session.setAttribute(CASFilter.CAS_FILTER_RECEIPT, serviceTicketReceipt);
         
         this.request.setSession(session);
+
+        this.request.getSession(true);
         
         localFilter.doFilter(this.request, this.response, this.filterChain);
         assertTrue(this.filterChain.isChainInvoked());
