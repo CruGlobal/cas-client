@@ -221,6 +221,11 @@ public class CASFilter implements Filter
      */
     private static final String CAS_FILTER_GATEWAYED = "edu.yale.its.tp.cas.client.filter.didGateway";
 
+    //CCCI
+    private static final String CAS_FILTER_TICKET_RE_REQUEST_COUNT = "edu.yale.its.tp.cas.client.filter.ticketRerequestCount";
+
+    private static final int INVALID_TICKET_RE_REQUEST_LIMIT = 3;
+
     // *********************************************************************
     // Configuration state
 
@@ -521,8 +526,12 @@ public class CASFilter implements Filter
         }
         catch (CASAuthenticationException e)
         {
-            log.error(e);
-            throw new ServletException(e);
+            handleTicketValidationFailure(
+                (HttpServletRequest) request,
+                (HttpServletResponse) response,
+                e);
+            // abort chain
+            return;
         }
 
         if (!isReceiptAcceptable(receipt)) { throw new ServletException(
@@ -560,6 +569,58 @@ public class CASFilter implements Filter
         redirectUrl = redirectUrl.replaceAll("\\?$", "");
 //        System.out.println("AUTH: Redirecting to self to clean ticket:" + redirectUrl);
         ((HttpServletResponse) response).sendRedirect(redirectUrl);
+    }
+
+    private void handleTicketValidationFailure(
+        HttpServletRequest request,
+        HttpServletResponse response, CASAuthenticationException e)
+        throws IOException, ServletException
+    {
+        if (e.getMessage().contains("INVALID_TICKET"))
+        {
+            handleInvalidTicket(request, response, e);
+        }
+        else
+        {
+            log.error(e);
+            throw new ServletException(e);
+        }
+    }
+
+    private void handleInvalidTicket(
+        HttpServletRequest request,
+        HttpServletResponse response,
+        CASAuthenticationException e) throws ServletException, IOException
+    {
+        log.warn("Ticket was invalid: ", e);
+        int count = countTicketReRequests(request);
+        if (count >= INVALID_TICKET_RE_REQUEST_LIMIT)
+        {
+            throw new ServletException("already re-requested a ticket " + count + " times; giving up. Last failure is chained:", e);
+        }
+        else
+        {
+            count++;
+            storeIncrementedTicketReRequestCount(request, count);
+            log.warn("Requesting a new ticket. (Attempt # " + count + ")");
+            redirectToCAS(request, response);
+        }
+    }
+
+    private int countTicketReRequests(HttpServletRequest request)
+    {
+        HttpSession session = request.getSession();
+        Integer count = (Integer) session.getAttribute(CAS_FILTER_TICKET_RE_REQUEST_COUNT);
+        if (count == null)
+            return 0;
+        else
+            return count;
+    }
+
+    private void storeIncrementedTicketReRequestCount(HttpServletRequest request, int count)
+    {
+        HttpSession session = request.getSession();
+        session.setAttribute(CAS_FILTER_TICKET_RE_REQUEST_COUNT, count);
     }
 
     private boolean requestIsPost(ServletRequest request)
