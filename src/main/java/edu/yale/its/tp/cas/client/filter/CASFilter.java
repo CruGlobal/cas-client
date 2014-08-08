@@ -748,7 +748,7 @@ public class CASFilter implements Filter
      * Returns either the configured service or figures it out for the current
      * request. The returned service is URL-encoded.
      */
-    private String getService(HttpServletRequest request) throws ServletException
+    private String getService(HttpServletRequest request)
     {
 
         log.trace("entering getService()");
@@ -781,8 +781,8 @@ public class CASFilter implements Filter
     /**
      * Redirects the user to CAS, determining the service from the request.
      */
-    private void redirectToCAS(HttpServletRequest request, HttpServletResponse response) throws IOException,
-            ServletException
+    private void redirectToCAS(HttpServletRequest request, HttpServletResponse response)
+        throws IOException
     {
         if (log.isTraceEnabled())
         {
