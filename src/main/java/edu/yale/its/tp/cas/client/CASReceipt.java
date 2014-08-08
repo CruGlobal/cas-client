@@ -69,7 +69,6 @@ public class CASReceipt implements Serializable
 
         if (!ptv.isAuthenticationSuccesful())
         {
-            log.error("validation of [" + ptv + "] was not successful.");
             throw new CASAuthenticationException("Unable to validate ProxyTicketValidator [" + ptv + "]");
         }
 
