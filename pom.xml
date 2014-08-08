@@ -94,6 +94,18 @@
                 <version>2.3.2</version>
             </plugin>
 
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-source-plugin</artifactId>
+              <executions>
+                <execution>
+                  <goals>
+                    <goal>jar</goal>
+                  </goals>
+                </execution>
+              </executions>
+            </plugin>
+
             <!-- Arquillian needs a version of surefire >= 2.9
              see https://community.jboss.org/wiki/WhatVersionOfSurefireShouldIUseToRunMyArquillianTestsInAMavenBuild -->
             <plugin>
