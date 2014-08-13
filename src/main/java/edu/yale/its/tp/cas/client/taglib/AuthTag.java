@@ -34,7 +34,6 @@ package edu.yale.its.tp.cas.client.taglib;
 
 import java.io.*;
 import java.util.*;
-import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.jsp.*;
 import javax.servlet.jsp.tagext.*;
@@ -85,15 +84,8 @@ public class AuthTag extends TagSupport
         // reset invocation-specific state
         casLogin = null;
         casValidate = null;
-        try
-        {
-            service = Util.getService(request, (String) pageContext.getServletContext().getInitParameter(
-                "edu.yale.its.tp.cas.serverName"));
-        }
-        catch (ServletException ex)
-        {
-            throw new JspException(ex);
-        }
+        service = Util.getService(request, (String) pageContext.getServletContext().getInitParameter(
+            "edu.yale.its.tp.cas.serverName"));
         acceptedProxies = new ArrayList();
         return EVAL_BODY_INCLUDE;
     }

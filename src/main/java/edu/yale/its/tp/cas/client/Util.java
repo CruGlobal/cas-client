@@ -52,12 +52,12 @@ public class Util
      * Returns a service ID (URL) as a composite of the preconfigured server
      * name and the runtime request, removing the request parameter "ticket".
      */
-    public static String getService(HttpServletRequest request, String server) throws ServletException
+    public static String getService(HttpServletRequest request, String server)
     {
         return getService(request, server, true);
     }
 
-    public static String getService(HttpServletRequest request, String server, boolean encode) throws ServletException
+    public static String getService(HttpServletRequest request, String server, boolean encode)
     {
         if (log.isTraceEnabled())
         {
