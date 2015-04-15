@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import edu.yale.its.tp.cas.util.Parameters;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -289,17 +290,20 @@ public class CASFilter implements Filter
     public void init(FilterConfig config) throws ServletException
     {
         System.out.println("Initializing CASFilter");
-        casLogin = config.getInitParameter(LOGIN_INIT_PARAM);
-        casValidate = config.getInitParameter(VALIDATE_INIT_PARAM);
-        casServiceUrl = config.getInitParameter(SERVICE_INIT_PARAM);
-        String casAuthorizedProxy = config.getInitParameter(AUTHORIZED_PROXY_INIT_PARAM);
-        casRenew = Boolean.valueOf(config.getInitParameter(RENEW_INIT_PARAM)).booleanValue();
-        casServerName = config.getInitParameter(SERVERNAME_INIT_PARAM);
-        casProxyCallbackUrl = config.getInitParameter(PROXY_CALLBACK_INIT_PARAM);
-        casLogoutCallbackUrl = config.getInitParameter(LOGOUT_CALLBACK_INIT_PARAM);
-        wrapRequest = Boolean.valueOf(config.getInitParameter(WRAP_REQUESTS_INIT_PARAM)).booleanValue();
-        casGateway = Boolean.valueOf(config.getInitParameter(GATEWAY_INIT_PARAM)).booleanValue();
-        remoteUserAttrib = config.getInitParameter(REMOTE_USER_ATTRIB_INIT_PARAM);
+
+        casLogin = Parameters.getParameter(config, LOGIN_INIT_PARAM);
+        casValidate = Parameters.getParameter(config, VALIDATE_INIT_PARAM);
+
+        casServiceUrl = Parameters.getParameter(config, SERVICE_INIT_PARAM);
+        String casAuthorizedProxy = Parameters.getParameter(config, AUTHORIZED_PROXY_INIT_PARAM);
+        casRenew = Boolean.valueOf(Parameters.getParameter(config, RENEW_INIT_PARAM)).booleanValue();
+        casServerName = Parameters.getParameter(config, SERVERNAME_INIT_PARAM);
+        casProxyCallbackUrl = Parameters.getParameter(config, PROXY_CALLBACK_INIT_PARAM);
+        casLogoutCallbackUrl = Parameters.getParameter(config, LOGOUT_CALLBACK_INIT_PARAM);
+        wrapRequest = Boolean.valueOf(Parameters.getParameter(config, WRAP_REQUESTS_INIT_PARAM)).booleanValue();
+        casGateway = Boolean.valueOf(Parameters.getParameter(config, GATEWAY_INIT_PARAM)).booleanValue();
+        remoteUserAttrib = Parameters.getParameter(config, REMOTE_USER_ATTRIB_INIT_PARAM);
+
 
         if (casGateway && Boolean.valueOf(casRenew).booleanValue()) { throw new ServletException(
             "gateway and renew cannot both be true in filter configuration"); }
