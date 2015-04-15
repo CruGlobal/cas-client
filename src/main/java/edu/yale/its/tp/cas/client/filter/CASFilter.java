@@ -197,6 +197,9 @@ public class CASFilter implements Filter
      */
     public final static String URL_PATTERN_EXCLUDE_INIT_PARAM = "url-pattern-exclude";
 
+    //CCCI
+    public final static String CAS_SERVER_URL_PREFIX = "casServerUrlPrefix";
+
     // Session attributes used by this filter
 
     /**
@@ -294,6 +297,19 @@ public class CASFilter implements Filter
         casLogin = Parameters.getParameter(config, LOGIN_INIT_PARAM);
         casValidate = Parameters.getParameter(config, VALIDATE_INIT_PARAM);
 
+        String casServerUrlPrefix = Parameters.getParameter(config, CAS_SERVER_URL_PREFIX);
+        if (casServerUrlPrefix != null)
+        {
+            if (casLogin == null)
+            {
+                casLogin = casServerUrlPrefix + "/login";
+            }
+            if (casValidate == null)
+            {
+                casValidate = casServerUrlPrefix + "/serviceValidate";
+            }
+        }
+
         casServiceUrl = Parameters.getParameter(config, SERVICE_INIT_PARAM);
         String casAuthorizedProxy = Parameters.getParameter(config, AUTHORIZED_PROXY_INIT_PARAM);
         casRenew = Boolean.valueOf(Parameters.getParameter(config, RENEW_INIT_PARAM)).booleanValue();
@@ -365,6 +381,7 @@ public class CASFilter implements Filter
         }
     }
 
+
     // *********************************************************************
     // Filter processing
 
@@ -416,7 +433,7 @@ public class CASFilter implements Filter
             fc.doFilter(wrapIfNecessary(request), response);
             return;
         }
-        
+
         // CCCI
         // Is this a request for logout? If so, process it
         if (!requestIsPost(request) && request.getParameter("ticket") != null && request.getParameter("ticket").startsWith("-"))
@@ -648,7 +665,7 @@ public class CASFilter implements Filter
 
     /**
      * CCCI
-     * 
+     *
      * @param request
      * @param response
      */
@@ -667,7 +684,7 @@ public class CASFilter implements Filter
 
     /**
      * CCCI
-     * 
+     *
      * @param receipt
      * @return
      */
@@ -679,13 +696,13 @@ public class CASFilter implements Filter
 
     /**
      * CCCI
-     * 
+     *
      * @param request
      * @param response
      */
     private void queueForLogout(ServletRequest request, ServletResponse response)
     {
-        if(requestIsPost(request)) return; 
+        if(requestIsPost(request)) return;
         String ticket = request.getParameter("ticket");
         ticket = ticket.substring(1); // remove the leading "-"
         logoutList.add(ticket);
@@ -696,7 +713,7 @@ public class CASFilter implements Filter
      * credentials that would have been acceptable to this path? Current
      * implementation checks whether from renew and whether proxy was
      * authorized.
-     * 
+     *
      * @param receipt
      * @return true if acceptable, false otherwise
      */
@@ -718,7 +735,7 @@ public class CASFilter implements Filter
      * Converts a ticket parameter to a CASReceipt, taking into account an
      * optionally configured trusted proxy in the tier immediately in front of
      * us.
-     * 
+     *
      * @throws ServletException
      *             - when unable to get service for request
      * @throws CASAuthenticationException
