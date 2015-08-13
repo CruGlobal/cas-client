@@ -220,10 +220,10 @@ public class CASValidateFilter implements Filter
     {
         casValidate = config.getInitParameter(VALIDATE_INIT_PARAM);
         casServiceUrl = config.getInitParameter(SERVICE_INIT_PARAM);
-        casRenew = Boolean.valueOf(config.getInitParameter(RENEW_INIT_PARAM)).booleanValue();
+        casRenew = Boolean.valueOf(config.getInitParameter(RENEW_INIT_PARAM));
         casServerName = config.getInitParameter(SERVERNAME_INIT_PARAM);
         casProxyCallbackUrl = config.getInitParameter(PROXY_CALLBACK_INIT_PARAM);
-        wrapRequest = Boolean.valueOf(config.getInitParameter(WRAP_REQUESTS_INIT_PARAM)).booleanValue();
+        wrapRequest = Boolean.valueOf(config.getInitParameter(WRAP_REQUESTS_INIT_PARAM));
         remoteUserAttrib = config.getInitParameter(CASFilter.REMOTE_USER_ATTRIB_INIT_PARAM);
 
         if (casServerName != null && casServiceUrl != null) { throw new ServletException(
@@ -463,7 +463,7 @@ public class CASValidateFilter implements Filter
         pv.setCasValidateUrl(casValidate);
         pv.setServiceTicket(request.getParameter("ticket"));
         pv.setService(getService(request));
-        pv.setRenew(Boolean.valueOf(casRenew).booleanValue());
+        pv.setRenew(casRenew);
         if (casProxyCallbackUrl != null)
         {
             pv.setProxyCallbackUrl(casProxyCallbackUrl);

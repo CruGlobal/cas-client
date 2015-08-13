@@ -317,16 +317,16 @@ public class CASFilter implements Filter
 
         casServiceUrl = Configuration.getParameter(config, SERVICE_INIT_PARAM);
         String casAuthorizedProxy = Configuration.getParameter(config, AUTHORIZED_PROXY_INIT_PARAM);
-        casRenew = Boolean.valueOf(Configuration.getParameter(config, RENEW_INIT_PARAM)).booleanValue();
+        casRenew = Boolean.valueOf(Configuration.getParameter(config, RENEW_INIT_PARAM));
         casServerName = Configuration.getParameter(config, SERVERNAME_INIT_PARAM);
         casProxyCallbackUrl = Configuration.getParameter(config, PROXY_CALLBACK_INIT_PARAM);
         casLogoutCallbackUrl = Configuration.getParameter(config, LOGOUT_CALLBACK_INIT_PARAM);
-        wrapRequest = Boolean.valueOf(Configuration.getParameter(config, WRAP_REQUESTS_INIT_PARAM)).booleanValue();
-        casGateway = Boolean.valueOf(Configuration.getParameter(config, GATEWAY_INIT_PARAM)).booleanValue();
+        wrapRequest = Boolean.valueOf(Configuration.getParameter(config, WRAP_REQUESTS_INIT_PARAM));
+        casGateway = Boolean.valueOf(Configuration.getParameter(config, GATEWAY_INIT_PARAM));
         remoteUserAttrib = Configuration.getParameter(config, REMOTE_USER_ATTRIB_INIT_PARAM);
 
 
-        if (casGateway && Boolean.valueOf(casRenew).booleanValue()) { throw new ServletException(
+        if (casGateway && Boolean.valueOf(casRenew)) { throw new ServletException(
             "gateway and renew cannot both be true in filter configuration"); }
         if (casServerName != null && casServiceUrl != null) { throw new ServletException(
             "serverName and serviceUrl cannot both be set: choose one."); }
@@ -504,7 +504,7 @@ public class CASFilter implements Filter
         {
             log.trace("CAS ticket was not present on request.");
             // did we go through the gateway already?
-            boolean didGateway = Boolean.valueOf((String) session.getAttribute(CAS_FILTER_GATEWAYED)).booleanValue();
+            boolean didGateway = Boolean.valueOf((String) session.getAttribute(CAS_FILTER_GATEWAYED));
 
             if (casLogin == null)
             {
@@ -772,7 +772,7 @@ public class CASFilter implements Filter
         pv.setCasValidateUrl(casValidate);
         pv.setServiceTicket(request.getParameter("ticket"));
         pv.setService(getService(request));
-        pv.setRenew(Boolean.valueOf(casRenew).booleanValue());
+        pv.setRenew(casRenew);
         if (casProxyCallbackUrl != null)
         {
             pv.setProxyCallbackUrl(casProxyCallbackUrl);
