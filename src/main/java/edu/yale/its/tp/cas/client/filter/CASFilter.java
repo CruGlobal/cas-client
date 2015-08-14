@@ -230,6 +230,9 @@ public class CASFilter implements Filter
 
     private static final int INVALID_TICKET_RE_REQUEST_LIMIT = 3;
 
+
+    private static final String INFINISPAN_LOGOUT_STORE = "infinispanLogoutStore";
+
     // *********************************************************************
     // Configuration state
 
@@ -285,7 +288,7 @@ public class CASFilter implements Filter
      * List of tickets that are pending logout. The next time the user appears,
      * they will be logged out.
      */
-    private static List logoutList = new ArrayList();
+    private LogoutStorage logoutList;
 
     // *********************************************************************
     // Initialization
@@ -293,6 +296,8 @@ public class CASFilter implements Filter
     public void init(FilterConfig config) throws ServletException
     {
         System.out.println("Initializing CASFilter");
+
+        initLogoutList();
 
         casLogin = Configuration.getParameter(config, LOGIN_INIT_PARAM);
         casValidate = Configuration.getParameter(config, VALIDATE_INIT_PARAM);
@@ -378,6 +383,22 @@ public class CASFilter implements Filter
         if (log.isDebugEnabled())
         {
             log.debug(("CASFilter initialized as: [" + toString() + "]"));
+        }
+    }
+
+    private void initLogoutList()
+    {
+        // using Object here to avoid runtime dependency on infinispan
+        Object store = Configuration.jndiLookup(INFINISPAN_LOGOUT_STORE);
+        if (store != null)
+        {
+            log.info("using infinispan logout storage");
+            logoutList = new InfinispanLogoutStorage(store);
+        }
+        else
+        {
+            log.info("using non-clustered logout storage");
+            logoutList = new ArrayListLogoutStorage();
         }
     }
 

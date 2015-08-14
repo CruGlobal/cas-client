@@ -23,6 +23,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
+import edu.yale.its.tp.cas.client.filter.InfinispanLogoutStorage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -31,7 +32,10 @@ import org.apache.commons.logging.LogFactory;
  * <br/>
  * A filter to echo logout requests to other instances operating behind a load
  * balancer. This is copied from ProxyEchoFilter.
- * 
+ *
+ * This is useful if the host names of the other instances can be determined up-front.
+ * It is not needed when using {@link InfinispanLogoutStorage}.
+ *
  * @author andrew.petro@yale.edu
  * @author Nathan.Kopp@ccci.org
  * @author Matt Drees
