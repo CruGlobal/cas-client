@@ -544,24 +544,6 @@ public class CASFilter implements Filter
             }
         }
 
-        // CCCI
-        // if our attribute's already present and valid, pass through the filter
-        // chain
-        if (ticket == null && receipt != null && isReceiptAcceptable(receipt))
-        {
-            log.trace("CAS_FILTER_RECEIPT attribute was present and acceptable - passing  request through filter..");
-            if (session.getAttribute(CASFilter.CAS_FILTER_RECEIPT_IS_FRESH_BEFORE_REDIRECT) != null)
-            {
-                session.removeAttribute(CASFilter.CAS_FILTER_RECEIPT_IS_FRESH_BEFORE_REDIRECT);
-            }
-            else
-            {
-                session.removeAttribute(CASFilter.CAS_FILTER_RECEIPT_IS_FRESH);
-            }
-            fc.doFilter(wrapIfNecessary(request), response);
-            return;
-        }
-
         try
         {
             receipt = getAuthenticatedUser((HttpServletRequest) request);
