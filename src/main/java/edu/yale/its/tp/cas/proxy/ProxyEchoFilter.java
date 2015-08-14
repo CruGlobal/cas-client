@@ -21,7 +21,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import edu.yale.its.tp.cas.util.Parameters;
+import edu.yale.its.tp.cas.util.Configuration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -67,7 +67,7 @@ public class ProxyEchoFilter implements Filter
         {
             log.trace("initializing ProxyExchoFilter using config " + config);
         }
-        String echoTargetsParam = Parameters.getParameter(config, INIT_PARAM_ECHO_TARGETS);
+        String echoTargetsParam = Configuration.getParameter(config, INIT_PARAM_ECHO_TARGETS);
         if (echoTargetsParam == null) { throw new ServletException(
             "The ProxyEchoFilter requires initialization parameter " + INIT_PARAM_ECHO_TARGETS
                     + " to be a whitespace delimited list of echo targets."); }

@@ -70,7 +70,7 @@ public class LogoutEchoFilter implements Filter
         {
             log.trace("initializing ProxyExchoFilter using config " + config);
         }
-        String echoTargetsParam = Parameters.getParameter(config, INIT_PARAM_ECHO_TARGETS);
+        String echoTargetsParam = Configuration.getParameter(config, INIT_PARAM_ECHO_TARGETS);
         if (echoTargetsParam == null) { throw new ServletException(
             "The ProxyEchoFilter requires initialization parameter " + INIT_PARAM_ECHO_TARGETS
                     + " to be a whitespace delimited list of echo targets."); }
@@ -80,7 +80,7 @@ public class LogoutEchoFilter implements Filter
             String target = st.nextToken();
             this.echoTargets.add(target);
         }
-        String continueChainParam = Parameters.getParameter(config, INIT_PARAM_CONTINUE_CHAIN);
+        String continueChainParam = Configuration.getParameter(config, INIT_PARAM_CONTINUE_CHAIN);
         if (continueChainParam != null)
         {
             this.continueChain = Boolean.parseBoolean(continueChainParam);

@@ -11,9 +11,9 @@ import javax.servlet.FilterConfig;
 /**
  * @author Matt Drees
  */
-public class Parameters
+public class Configuration
 {
-    private static Log log = LogFactory.getLog(Parameters.class);
+    private static Log log = LogFactory.getLog(Configuration.class);
 
     public static String getParameter(FilterConfig config, String parameterName) {
         String jndiValue = jndiLookup(parameterName);
@@ -27,10 +27,10 @@ public class Parameters
         }
     }
 
-    private static String jndiLookup(String parameterName) {
+    public static <T> T jndiLookup(String parameterName) {
         String location = "java:comp/env/cas/" + parameterName;
         try {
-            return (String) new InitialContext().lookup(location);
+            return InitialContext.doLookup(location);
         } catch (NameNotFoundException e) {
             return null;
         } catch (NamingException e) {

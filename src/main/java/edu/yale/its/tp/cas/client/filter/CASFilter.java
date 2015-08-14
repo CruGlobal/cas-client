@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import edu.yale.its.tp.cas.util.Parameters;
+import edu.yale.its.tp.cas.util.Configuration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -294,10 +294,10 @@ public class CASFilter implements Filter
     {
         System.out.println("Initializing CASFilter");
 
-        casLogin = Parameters.getParameter(config, LOGIN_INIT_PARAM);
-        casValidate = Parameters.getParameter(config, VALIDATE_INIT_PARAM);
+        casLogin = Configuration.getParameter(config, LOGIN_INIT_PARAM);
+        casValidate = Configuration.getParameter(config, VALIDATE_INIT_PARAM);
 
-        String casServerUrlPrefix = Parameters.getParameter(config, CAS_SERVER_URL_PREFIX);
+        String casServerUrlPrefix = Configuration.getParameter(config, CAS_SERVER_URL_PREFIX);
         if (casServerUrlPrefix != null)
         {
             if (casLogin == null)
@@ -310,15 +310,15 @@ public class CASFilter implements Filter
             }
         }
 
-        casServiceUrl = Parameters.getParameter(config, SERVICE_INIT_PARAM);
-        String casAuthorizedProxy = Parameters.getParameter(config, AUTHORIZED_PROXY_INIT_PARAM);
-        casRenew = Boolean.valueOf(Parameters.getParameter(config, RENEW_INIT_PARAM)).booleanValue();
-        casServerName = Parameters.getParameter(config, SERVERNAME_INIT_PARAM);
-        casProxyCallbackUrl = Parameters.getParameter(config, PROXY_CALLBACK_INIT_PARAM);
-        casLogoutCallbackUrl = Parameters.getParameter(config, LOGOUT_CALLBACK_INIT_PARAM);
-        wrapRequest = Boolean.valueOf(Parameters.getParameter(config, WRAP_REQUESTS_INIT_PARAM)).booleanValue();
-        casGateway = Boolean.valueOf(Parameters.getParameter(config, GATEWAY_INIT_PARAM)).booleanValue();
-        remoteUserAttrib = Parameters.getParameter(config, REMOTE_USER_ATTRIB_INIT_PARAM);
+        casServiceUrl = Configuration.getParameter(config, SERVICE_INIT_PARAM);
+        String casAuthorizedProxy = Configuration.getParameter(config, AUTHORIZED_PROXY_INIT_PARAM);
+        casRenew = Boolean.valueOf(Configuration.getParameter(config, RENEW_INIT_PARAM)).booleanValue();
+        casServerName = Configuration.getParameter(config, SERVERNAME_INIT_PARAM);
+        casProxyCallbackUrl = Configuration.getParameter(config, PROXY_CALLBACK_INIT_PARAM);
+        casLogoutCallbackUrl = Configuration.getParameter(config, LOGOUT_CALLBACK_INIT_PARAM);
+        wrapRequest = Boolean.valueOf(Configuration.getParameter(config, WRAP_REQUESTS_INIT_PARAM)).booleanValue();
+        casGateway = Boolean.valueOf(Configuration.getParameter(config, GATEWAY_INIT_PARAM)).booleanValue();
+        remoteUserAttrib = Configuration.getParameter(config, REMOTE_USER_ATTRIB_INIT_PARAM);
 
 
         if (casGateway && Boolean.valueOf(casRenew).booleanValue()) { throw new ServletException(
