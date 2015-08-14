@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import edu.yale.its.tp.cas.util.Configuration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -196,6 +197,9 @@ public class CASFilter implements Filter
      */
     public final static String URL_PATTERN_EXCLUDE_INIT_PARAM = "url-pattern-exclude";
 
+    //CCCI
+    public final static String CAS_SERVER_URL_PREFIX = "casServerUrlPrefix";
+
     // Session attributes used by this filter
 
     /**
@@ -225,6 +229,9 @@ public class CASFilter implements Filter
     private static final String CAS_FILTER_TICKET_RE_REQUEST_COUNT = "edu.yale.its.tp.cas.client.filter.ticketRerequestCount";
 
     private static final int INVALID_TICKET_RE_REQUEST_LIMIT = 3;
+
+
+    private static final String INFINISPAN_LOGOUT_STORE = "infinispanLogoutStore";
 
     // *********************************************************************
     // Configuration state
@@ -281,7 +288,7 @@ public class CASFilter implements Filter
      * List of tickets that are pending logout. The next time the user appears,
      * they will be logged out.
      */
-    private static List logoutList = new ArrayList();
+    private LogoutStorage logoutList;
 
     // *********************************************************************
     // Initialization
@@ -289,19 +296,37 @@ public class CASFilter implements Filter
     public void init(FilterConfig config) throws ServletException
     {
         System.out.println("Initializing CASFilter");
-        casLogin = config.getInitParameter(LOGIN_INIT_PARAM);
-        casValidate = config.getInitParameter(VALIDATE_INIT_PARAM);
-        casServiceUrl = config.getInitParameter(SERVICE_INIT_PARAM);
-        String casAuthorizedProxy = config.getInitParameter(AUTHORIZED_PROXY_INIT_PARAM);
-        casRenew = Boolean.valueOf(config.getInitParameter(RENEW_INIT_PARAM)).booleanValue();
-        casServerName = config.getInitParameter(SERVERNAME_INIT_PARAM);
-        casProxyCallbackUrl = config.getInitParameter(PROXY_CALLBACK_INIT_PARAM);
-        casLogoutCallbackUrl = config.getInitParameter(LOGOUT_CALLBACK_INIT_PARAM);
-        wrapRequest = Boolean.valueOf(config.getInitParameter(WRAP_REQUESTS_INIT_PARAM)).booleanValue();
-        casGateway = Boolean.valueOf(config.getInitParameter(GATEWAY_INIT_PARAM)).booleanValue();
-        remoteUserAttrib = config.getInitParameter(REMOTE_USER_ATTRIB_INIT_PARAM);
 
-        if (casGateway && Boolean.valueOf(casRenew).booleanValue()) { throw new ServletException(
+        initLogoutList();
+
+        casLogin = Configuration.getParameter(config, LOGIN_INIT_PARAM);
+        casValidate = Configuration.getParameter(config, VALIDATE_INIT_PARAM);
+
+        String casServerUrlPrefix = Configuration.getParameter(config, CAS_SERVER_URL_PREFIX);
+        if (casServerUrlPrefix != null)
+        {
+            if (casLogin == null)
+            {
+                casLogin = casServerUrlPrefix + "/login";
+            }
+            if (casValidate == null)
+            {
+                casValidate = casServerUrlPrefix + "/serviceValidate";
+            }
+        }
+
+        casServiceUrl = Configuration.getParameter(config, SERVICE_INIT_PARAM);
+        String casAuthorizedProxy = Configuration.getParameter(config, AUTHORIZED_PROXY_INIT_PARAM);
+        casRenew = Boolean.valueOf(Configuration.getParameter(config, RENEW_INIT_PARAM));
+        casServerName = Configuration.getParameter(config, SERVERNAME_INIT_PARAM);
+        casProxyCallbackUrl = Configuration.getParameter(config, PROXY_CALLBACK_INIT_PARAM);
+        casLogoutCallbackUrl = Configuration.getParameter(config, LOGOUT_CALLBACK_INIT_PARAM);
+        wrapRequest = Boolean.valueOf(Configuration.getParameter(config, WRAP_REQUESTS_INIT_PARAM));
+        casGateway = Boolean.valueOf(Configuration.getParameter(config, GATEWAY_INIT_PARAM));
+        remoteUserAttrib = Configuration.getParameter(config, REMOTE_USER_ATTRIB_INIT_PARAM);
+
+
+        if (casGateway && Boolean.valueOf(casRenew)) { throw new ServletException(
             "gateway and renew cannot both be true in filter configuration"); }
         if (casServerName != null && casServiceUrl != null) { throw new ServletException(
             "serverName and serviceUrl cannot both be set: choose one."); }
@@ -361,6 +386,23 @@ public class CASFilter implements Filter
         }
     }
 
+    private void initLogoutList()
+    {
+        // using Object here to avoid runtime dependency on infinispan
+        Object store = Configuration.jndiLookup(INFINISPAN_LOGOUT_STORE);
+        if (store != null)
+        {
+            log.info("using infinispan logout storage");
+            logoutList = new InfinispanLogoutStorage(store);
+        }
+        else
+        {
+            log.info("using non-clustered logout storage");
+            logoutList = new ArrayListLogoutStorage();
+        }
+    }
+
+
     // *********************************************************************
     // Filter processing
 
@@ -412,7 +454,7 @@ public class CASFilter implements Filter
             fc.doFilter(wrapIfNecessary(request), response);
             return;
         }
-        
+
         // CCCI
         // Is this a request for logout? If so, process it
         if (!requestIsPost(request) && request.getParameter("ticket") != null && request.getParameter("ticket").startsWith("-"))
@@ -462,7 +504,7 @@ public class CASFilter implements Filter
         {
             log.trace("CAS ticket was not present on request.");
             // did we go through the gateway already?
-            boolean didGateway = Boolean.valueOf((String) session.getAttribute(CAS_FILTER_GATEWAYED)).booleanValue();
+            boolean didGateway = Boolean.valueOf((String) session.getAttribute(CAS_FILTER_GATEWAYED));
 
             if (casLogin == null)
             {
@@ -500,24 +542,6 @@ public class CASFilter implements Filter
                     return;
                 }
             }
-        }
-
-        // CCCI
-        // if our attribute's already present and valid, pass through the filter
-        // chain
-        if (ticket == null && receipt != null && isReceiptAcceptable(receipt))
-        {
-            log.trace("CAS_FILTER_RECEIPT attribute was present and acceptable - passing  request through filter..");
-            if (session.getAttribute(CASFilter.CAS_FILTER_RECEIPT_IS_FRESH_BEFORE_REDIRECT) != null)
-            {
-                session.removeAttribute(CASFilter.CAS_FILTER_RECEIPT_IS_FRESH_BEFORE_REDIRECT);
-            }
-            else
-            {
-                session.removeAttribute(CASFilter.CAS_FILTER_RECEIPT_IS_FRESH);
-            }
-            fc.doFilter(wrapIfNecessary(request), response);
-            return;
         }
 
         try
@@ -644,7 +668,7 @@ public class CASFilter implements Filter
 
     /**
      * CCCI
-     * 
+     *
      * @param request
      * @param response
      */
@@ -663,7 +687,7 @@ public class CASFilter implements Filter
 
     /**
      * CCCI
-     * 
+     *
      * @param receipt
      * @return
      */
@@ -675,13 +699,13 @@ public class CASFilter implements Filter
 
     /**
      * CCCI
-     * 
+     *
      * @param request
      * @param response
      */
     private void queueForLogout(ServletRequest request, ServletResponse response)
     {
-        if(requestIsPost(request)) return; 
+        if(requestIsPost(request)) return;
         String ticket = request.getParameter("ticket");
         ticket = ticket.substring(1); // remove the leading "-"
         logoutList.add(ticket);
@@ -692,7 +716,7 @@ public class CASFilter implements Filter
      * credentials that would have been acceptable to this path? Current
      * implementation checks whether from renew and whether proxy was
      * authorized.
-     * 
+     *
      * @param receipt
      * @return true if acceptable, false otherwise
      */
@@ -714,7 +738,7 @@ public class CASFilter implements Filter
      * Converts a ticket parameter to a CASReceipt, taking into account an
      * optionally configured trusted proxy in the tier immediately in front of
      * us.
-     * 
+     *
      * @throws ServletException
      *             - when unable to get service for request
      * @throws CASAuthenticationException
@@ -730,7 +754,7 @@ public class CASFilter implements Filter
         pv.setCasValidateUrl(casValidate);
         pv.setServiceTicket(request.getParameter("ticket"));
         pv.setService(getService(request));
-        pv.setRenew(Boolean.valueOf(casRenew).booleanValue());
+        pv.setRenew(casRenew);
         if (casProxyCallbackUrl != null)
         {
             pv.setProxyCallbackUrl(casProxyCallbackUrl);

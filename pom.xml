@@ -4,7 +4,7 @@
     <groupId>org.ccci</groupId>
     <artifactId>cas-client-custom</artifactId>
     <packaging>jar</packaging>
-    <version>2.1.5</version>
+    <version>2.1.6</version>
     <name>Cru CAS Client</name>
 
     <properties>
@@ -79,6 +79,18 @@
             <artifactId>jboss-annotations-api_1.1_spec</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <!--
+           for applications that wish to use the InfinispanLogoutStorage
+        -->
+        <dependency>
+            <groupId>org.infinispan</groupId>
+            <artifactId>infinispan-core</artifactId>
+            <version>6.0.2.Final</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+
 
     </dependencies>
 

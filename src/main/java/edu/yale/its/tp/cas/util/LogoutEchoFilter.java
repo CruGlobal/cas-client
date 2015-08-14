@@ -23,6 +23,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
+import edu.yale.its.tp.cas.client.filter.InfinispanLogoutStorage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -31,7 +32,10 @@ import org.apache.commons.logging.LogFactory;
  * <br/>
  * A filter to echo logout requests to other instances operating behind a load
  * balancer. This is copied from ProxyEchoFilter.
- * 
+ *
+ * This is useful if the host names of the other instances can be determined up-front.
+ * It is not needed when using {@link InfinispanLogoutStorage}.
+ *
  * @author andrew.petro@yale.edu
  * @author Nathan.Kopp@ccci.org
  * @author Matt Drees
@@ -70,7 +74,7 @@ public class LogoutEchoFilter implements Filter
         {
             log.trace("initializing ProxyExchoFilter using config " + config);
         }
-        String echoTargetsParam = config.getInitParameter(INIT_PARAM_ECHO_TARGETS);
+        String echoTargetsParam = Configuration.getParameter(config, INIT_PARAM_ECHO_TARGETS);
         if (echoTargetsParam == null) { throw new ServletException(
             "The ProxyEchoFilter requires initialization parameter " + INIT_PARAM_ECHO_TARGETS
                     + " to be a whitespace delimited list of echo targets."); }
@@ -80,7 +84,7 @@ public class LogoutEchoFilter implements Filter
             String target = st.nextToken();
             this.echoTargets.add(target);
         }
-        String continueChainParam = config.getInitParameter(INIT_PARAM_CONTINUE_CHAIN);
+        String continueChainParam = Configuration.getParameter(config, INIT_PARAM_CONTINUE_CHAIN);
         if (continueChainParam != null)
         {
             this.continueChain = Boolean.parseBoolean(continueChainParam);
